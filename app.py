@@ -39,6 +39,23 @@ class Product(db.Model):
         }
 
 
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    customer_name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(160), nullable=False)
+    total = db.Column(db.Float, nullable=False, default=0.0)
+    items_json = db.Column(db.Text, nullable=False, default="[]")
+
+
+class CommissionInquiry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(160), nullable=False)
+    project_type = db.Column(db.String(120), nullable=False)
+    yarn_color = db.Column(db.String(120), nullable=False)
+    details = db.Column(db.Text, nullable=False)
+
+
 def seed_products():
     if Product.query.first() is not None:
         return
@@ -114,8 +131,41 @@ def get_products():
 
 @app.route("/api/orders", methods=["POST"])
 def create_order():
+    import json
+
     data = request.get_json(silent=True) or {}
-    return jsonify({"status": "ok", "order": data}), 201
+    email = (data.get("email") or "").strip()
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+
+    order = Order(
+        customer_name=(data.get("name") or email.split("@")[0]).strip(),
+        email=email,
+        total=float(data.get("total") or 0.0),
+        items_json=json.dumps(data.get("items") or []),
+    )
+    db.session.add(order)
+    db.session.commit()
+    return jsonify({"status": "ok", "order_id": order.id}), 201
+
+
+@app.route("/api/commissions", methods=["POST"])
+def create_commission():
+    data = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip()
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+
+    inquiry = CommissionInquiry(
+        name=(data.get("name") or "Guest").strip(),
+        email=email,
+        project_type=(data.get("project_type") or "Custom Piece").strip(),
+        yarn_color=(data.get("yarn_color") or "Natural Cream").strip(),
+        details=(data.get("details") or "").strip(),
+    )
+    db.session.add(inquiry)
+    db.session.commit()
+    return jsonify({"status": "ok", "inquiry_id": inquiry.id}), 201
 
 
 if __name__ == "__main__":
