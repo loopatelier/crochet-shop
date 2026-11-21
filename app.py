@@ -51,7 +51,7 @@ def seed_products():
             fiber="Soft Cotton & Milk Yarn",
             badge="Bestseller",
             description="Handcrafted crochet floral keepsake wrapped for gifting.",
-            image_url="/static/cro2.jpeg",
+            image_url="static/cro2.jpeg",
         ),
         Product(
             name="Barnaby the Chunky Bear",
@@ -60,7 +60,7 @@ def seed_products():
             fiber="100% Velvet Chenille",
             badge="Ready to Ship",
             description="Hand-crocheted plush bear with safety eyes and ultra-soft velvet.",
-            image_url="/static/cro3.jpeg",
+            image_url="static/cro3.jpeg",
         ),
         Product(
             name="Heirloom Waffle Throw",
@@ -69,7 +69,7 @@ def seed_products():
             fiber="Merino Wool Blend",
             badge="Made to Order",
             description="Textured waffle-stitch throw blanket in warm oatmeal cream.",
-            image_url="/static/cro4.jpeg",
+            image_url="static/cro4.jpeg",
         ),
         Product(
             name="Meadow Granny Square Tote",
@@ -78,7 +78,7 @@ def seed_products():
             fiber="Mercerized Cotton",
             badge="New",
             description="Structured handmade granny square tote bag for everyday outings.",
-            image_url="/static/cro5.jpeg",
+            image_url="static/cro5.jpeg",
         ),
         Product(
             name="Mini Charm & Keychain Trio",
@@ -87,7 +87,7 @@ def seed_products():
             fiber="Fine Yarn & Beaded Accents",
             badge="Limited",
             description="Playful handmade charms for bags, keys, and phone straps.",
-            image_url="/static/cro6.jpeg",
+            image_url="static/cro6.jpeg",
         ),
     ]
 
