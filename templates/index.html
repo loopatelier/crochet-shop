@@ -54,6 +54,7 @@
             <!-- Brand Logo -->
             <a href="#" class="flex items-center gap-2.5 group">
                 <div class="w-10 h-10 rounded-full bg-terracotta text-cream flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                    <!-- Custom Yarn Ball SVG Icon -->
                     <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="9"/>
                         <path d="M5.5 8.5c4-1 9 1 13 5"/>
@@ -141,12 +142,12 @@
                     <!-- Hero Visual Showcase -->
                     <div class="lg:col-span-6 relative">
                         <div class="relative rounded-3xl overflow-hidden shadow-xl bg-beige aspect-[4/3] border-4 border-white">
-                            <img
-                                src="{{ url_for('static', filename='cro1.jpeg') }}"
-                                onerror="this.onerror=null;this.src='/static/cro1.jpeg';"
-                                alt="Cozy textured handmade crochet blankets and yarn"
+                            <img src="{{ url_for('static', filename='cro1.jpeg') }}"
+                                onerror="this.onerror=null;this.src='https://placehold.co/800x600/EFE7DC/3A322D?text=Handcrafted+Crochet+Collection';"
+                                alt="Cozy textured handmade crochet blankets and yarn" 
                                 class="w-full h-full object-cover"
                             >
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -160,14 +161,32 @@
                 <div class="text-center max-w-2xl mx-auto mb-10 space-y-3">
                     <span class="text-xs font-bold uppercase tracking-widest text-sage-dark">Curated Goods</span>
                     <h2 class="font-serif text-3xl sm:text-4xl font-semibold text-charcoal">Handmade Creations</h2>
-                    <p class="text-taupe text-sm sm:text-base">Shop what's ready, or order your own made-to-order piece.</p>
+                    <p class="text-taupe text-sm sm:text-base">Shop what's ready,or orderyour own made-to-order piece.</p>
                 </div>
 
-                <!-- Category Filter Pills (populated dynamically from loaded products) -->
-                <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-12" id="category-filters"></div>
+                <!-- Category Filter Pills -->
+                <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-12" id="category-filters">
+                    <button onclick="filterProducts('all')" data-category="all" class="filter-btn active px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-charcoal text-cream shadow-sm">
+                        All Pieces
+                    </button>
+                    <button onclick="filterProducts('amigurumi')" data-category="amigurumi" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand">
+                        Amigurumi
+                    </button>
+                    <button onclick="filterProducts('Keychains')" data-category="Keychains" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand">
+                        Keychains
+                    </button>
+                    <button onclick="filterProducts('wearables')" data-category="wearables" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand">
+                        Wearables
+                    </button>
+                    <button onclick="filterProducts('custom')" data-category="custom" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand">
+                        Custom Slots
+                    </button>
+                </div>
 
                 <!-- Product Grid -->
-                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Products injected dynamically via JS -->
+                </div>
             </div>
         </section>
 
@@ -179,10 +198,10 @@
                         <!-- Maker Image -->
                         <div class="lg:col-span-5">
                             <div class="relative rounded-2xl overflow-hidden aspect-[4/5] shadow-md border-4 border-cream">
-                                <img
-                                    src="/static/cro1.jpeg"
-                                    onerror="this.onerror=null;this.src='https://placehold.co/600x750/E4D8C8/3A322D?text=The+Loop+Atelier';"
-                                    alt="Maker crocheting with warm yarn"
+                                <img 
+                                    src="https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=800&q=80" 
+                                    onerror="this.onerror=null;this.src='https://placehold.co/600x750/E4D8C8/3A322D?text=Clara+in+Her+Studio';"
+                                    alt="Maker crocheting with warm yarn" 
                                     class="w-full h-full object-cover"
                                 >
                             </div>
@@ -204,9 +223,10 @@
                                     Every piece I make takes hours of patience, care and love.
                                 </p>
                                 <p>
-                                    In a world that moves too fast, <strong>The Loop Atelier</strong> is my little slow corner. A place where handmade still means something and where every order is made with a full heart.
+                                    In a world that moves too fast,<strong>The Loop Atelier</strong> is my little slow corner. A place where handmade still means something and where every order is made with a full heart.
                                 </p>
-                                <p>Thank you for being here, for supporting handmade and to make something special just for you.</p>
+                                <p>Thank you for being here, for supporting handmade and to make something special just for you.
+                                </p>
                             </div>
 
                             <!-- Studio Stats -->
@@ -243,10 +263,12 @@
 
                 <form id="commission-form" onsubmit="handleCommissionSubmit(event)" class="bg-cream rounded-3xl p-6 sm:p-10 shadow-sm border border-sand space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Name -->
                         <div>
                             <label for="comm-name" class="block text-sm font-semibold text-charcoal mb-2">Your Name *</label>
                             <input type="text" id="comm-name" required placeholder="e.g., Maya Lin" class="w-full px-4 py-3 rounded-xl bg-beige/60 border border-sand focus:border-terracotta focus:ring-2 focus:ring-terracotta/20 outline-none transition-all text-sm">
                         </div>
+                        <!-- Email -->
                         <div>
                             <label for="comm-email" class="block text-sm font-semibold text-charcoal mb-2">Email Address *</label>
                             <input type="email" id="comm-email" required placeholder="maya@example.com" class="w-full px-4 py-3 rounded-xl bg-beige/60 border border-sand focus:border-terracotta focus:ring-2 focus:ring-terracotta/20 outline-none transition-all text-sm">
@@ -254,6 +276,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Project Category -->
                         <div>
                             <label for="comm-type" class="block text-sm font-semibold text-charcoal mb-2">Project Type</label>
                             <select id="comm-type" class="w-full px-4 py-3 rounded-xl bg-beige/60 border border-sand focus:border-terracotta focus:ring-2 focus:ring-terracotta/20 outline-none transition-all text-sm text-charcoal">
@@ -264,6 +287,7 @@
                             </select>
                         </div>
 
+                        <!-- Preferred Timeline -->
                         <div>
                             <label for="comm-timeline" class="block text-sm font-semibold text-charcoal mb-2">Needed By (Optional)</label>
                             <input type="date" id="comm-timeline" class="w-full px-4 py-3 rounded-xl bg-beige/60 border border-sand focus:border-terracotta focus:ring-2 focus:ring-terracotta/20 outline-none transition-all text-sm text-charcoal">
@@ -303,7 +327,7 @@
                     <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <p class="text-xs text-taupe flex items-center gap-1.5">
                             <i data-lucide="info" class="w-4 h-4 text-sage-dark shrink-0"></i>
-                            Ayesha responds with a custom quote & yarn sample photos within 48 hours.
+                            Clara responds with a custom quote & yarn sample photos within 48 hours.
                         </p>
                         <button type="submit" class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-cream font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2">
                             <span>Send Inquiry</span>
@@ -319,6 +343,7 @@
     <footer class="bg-charcoal text-beige py-14">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-10 pb-10 border-b border-taupe/30">
+                <!-- Brand Info -->
                 <div class="md:col-span-5 space-y-4">
                     <div class="flex items-center gap-2.5">
                         <div class="w-9 h-9 rounded-full bg-terracotta text-cream flex items-center justify-center">
@@ -329,6 +354,7 @@
                     <p class="text-sm text-sand/80 max-w-sm leading-relaxed">
                         Heirloom-quality crochet pieces made slowly by hand. Bringing warmth, texture, and mindful craftsmanship into your everyday spaces.
                     </p>
+                    <!-- Social Links -->
                     <div class="flex items-center gap-3 pt-2">
                         <a href="#social-ig" onclick="showToast('Opening Instagram @the_loop.atelier')" class="w-10 h-10 rounded-full bg-taupe/30 hover:bg-terracotta text-cream flex items-center justify-center transition-colors" aria-label="Instagram">
                             <i data-lucide="instagram" class="w-4 h-4"></i>
@@ -339,12 +365,13 @@
                         <a href="#social-yt" onclick="showToast('Opening Studio Vlog Channel')" class="w-10 h-10 rounded-full bg-taupe/30 hover:bg-terracotta text-cream flex items-center justify-center transition-colors" aria-label="YouTube">
                             <i data-lucide="youtube" class="w-4 h-4"></i>
                         </a>
-                        <a href="mailto:theloopatelier390@gmail.com" class="w-10 h-10 rounded-full bg-taupe/30 hover:bg-terracotta text-cream flex items-center justify-center transition-colors" aria-label="Email">
+                        <a href="mail to: theloopatelier390@gmail.com" class="w-10 h-10 rounded-full bg-taupe/30 hover:bg-terracotta text-cream flex items-center justify-center transition-colors" aria-label="Email">
                             <i data-lucide="mail" class="w-4 h-4"></i>
                         </a>
                     </div>
                 </div>
 
+                <!-- Quick Links -->
                 <div class="md:col-span-3 space-y-3">
                     <h4 class="font-serif text-base font-semibold text-cream">Explore</h4>
                     <ul class="space-y-2 text-sm text-sand/80">
@@ -355,6 +382,7 @@
                     </ul>
                 </div>
 
+                <!-- Care & Studio Info -->
                 <div class="md:col-span-4 space-y-3">
                     <h4 class="font-serif text-base font-semibold text-cream">Fiber Care & Notes</h4>
                     <p class="text-xs text-sand/75 leading-relaxed">
@@ -375,9 +403,12 @@
 
     <!-- Interactive Shopping Cart / Order Inquiry Drawer Modal -->
     <div id="cart-modal" class="fixed inset-0 z-50 hidden">
+        <!-- Backdrop -->
         <div onclick="toggleCart()" class="fixed inset-0 bg-charcoal/50 backdrop-blur-xs transition-opacity"></div>
         
+        <!-- Slide-over Panel -->
         <div class="fixed inset-y-0 right-0 max-w-md w-full bg-cream shadow-2xl border-l border-sand flex flex-col z-10">
+            <!-- Drawer Header -->
             <div class="p-6 border-b border-sand flex items-center justify-between bg-beige/50">
                 <div class="flex items-center gap-2.5">
                     <i data-lucide="shopping-bag" class="w-5 h-5 text-terracotta"></i>
@@ -388,8 +419,12 @@
                 </button>
             </div>
 
-            <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
+            <!-- Cart Items List -->
+            <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <!-- Items populated dynamically -->
+            </div>
 
+            <!-- Cart Footer / Checkout Inquiry -->
             <div id="cart-footer" class="p-6 border-t border-sand bg-beige/40 space-y-4">
                 <div class="space-y-1.5">
                     <div class="flex justify-between text-sm text-taupe">
@@ -399,6 +434,7 @@
                     <p class="text-xs text-taupe">Complimentary plastic-free shipping on orders over $120.</p>
                 </div>
 
+                <!-- Quick Order / Inquiry Submission inside Cart -->
                 <form onsubmit="submitBasketOrder(event)" class="space-y-3 pt-2">
                     <input type="email" id="checkout-email" required placeholder="Enter your email to reserve & checkout..." class="w-full px-4 py-2.5 rounded-xl bg-cream border border-sand text-sm focus:border-terracotta outline-none">
                     <button type="submit" class="w-full py-3.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-cream font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2">
@@ -412,140 +448,128 @@
 
     <!-- JavaScript Application Logic -->
     <script>
-        const FALLBACK_PRODUCTS = [
+        // Product Catalog Data
+        const products = [
             {
                 id: 1,
-                name: "Cozy Crochet Bouquet",
-                category: "bouquets",
-                price: 38,
-                fiber: "Soft Cotton & Milk Yarn",
-                badge: "Bestseller",
-                description: "Handcrafted crochet floral keepsake wrapped for gifting.",
-                image_url: "/static/cro2.jpeg"
+                name: "Barnaby the Woodland Bear",
+                category: "amigurumi",
+                categoryLabel: "Amigurumi",
+                price: 48,
+                fiber: "100% Organic Cotton",
+                badge: "Ready to Ship",
+                description: "Soft-stuffed heirloom bear wearing a removable sage green knitted scarf. Safe embroidered eyes.",
+                image: "https://images.unsplash.com/photo-1618842676088-c4d48a6a7c9d?auto=format&fit=crop&w=700&q=80"
             },
             {
                 id: 2,
-                name: "Barnaby the Chunky Bear",
-                category: "amigurumi",
-                price: 48,
-                fiber: "100% Velvet Chenille",
-                badge: "Ready to Ship",
-                description: "Hand-crocheted plush bear with safety eyes and ultra-soft velvet.",
-                image_url: "/static/cro3.jpeg"
+                name: "Meadowlark Waffle Throw",
+                category: "blankets",
+                categoryLabel: "Blankets",
+                price: 165,
+                fiber: "Merino Wool & Cotton",
+                badge: "Bestseller",
+                description: "Deeply textured waffle-stitch throw blanket in warm oatmeal cream. Measures 50\" x 60\".",
+                image: "https://images.unsplash.com/photo-1580301762395-21ce84d00bc6?auto=format&fit=crop&w=700&q=80"
             },
             {
                 id: 3,
-                name: "Heirloom Waffle Throw",
-                category: "blankets",
-                price: 145,
-                fiber: "Merino Wool Blend",
+                name: "Autumn Berry Slouch Cardigan",
+                category: "wearables",
+                categoryLabel: "Wearables",
+                price: 135,
+                fiber: "Alpaca & Silk Blend",
                 badge: "Made to Order",
-                description: "Textured waffle-stitch throw blanket in warm oatmeal cream.",
-                image_url: "/static/cro4.jpeg"
+                description: "Chunky balloon-sleeve cardigan in rich terracotta with hand-carved wooden buttons.",
+                image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=700&q=80"
             },
             {
                 id: 4,
-                name: "Meadow Granny Square Tote",
-                category: "wearables",
-                price: 62,
-                fiber: "Mercerized Cotton",
-                badge: "New",
-                description: "Structured handmade granny square tote bag for everyday outings.",
-                image_url: "/static/cro5.jpeg"
+                name: "Cottagecore Mushroom Duo",
+                category: "amigurumi",
+                categoryLabel: "Amigurumi",
+                price: 36,
+                fiber: "Botanical Dyed Cotton",
+                badge: "Ready to Ship",
+                description: "Pair of pocket-sized forest toadstools weighted with natural flaxseeds for shelf styling or play.",
+                image: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=700&q=80"
             },
             {
-                id: 4,
-                name: "Meadow Granny Square Tote",
+                id: 5,
+                name: "Botanical Granny Square Tote",
                 category: "wearables",
-                price: 80,
-                fiber: "Mercerized Cotton",
-                badge: "New",
-                description: "Structured handmade granny square tote bag for everyday outings.",
-                image_url: "/static/cro56.jpeg"
+                categoryLabel: "Wearables",
+                price: 64,
+                fiber: "Unbleached Hemp & Cotton",
+                badge: "Ready to Ship",
+                description: "Sturdy market tote featuring daisy motifs on a sage green backdrop with reinforced straps.",
+                image: "https://images.unsplash.com/photo-1590874103328-eac38a689ce7?auto=format&fit=crop&w=700&q=80"
+            },
+            {
+                id: 6,
+                name: "Bespoke Commission Deposit",
+                category: "custom",
+                categoryLabel: "Custom Orders",
+                price: 50,
+                fiber: "Your Choice of Yarn",
+                badge: "2 Slots Left",
+                description: "Reserve your spot on Clara's studio calendar for a custom-designed heirloom or pet portrait.",
+                image: "https://images.unsplash.com/photo-1544967082-d9d25d867d66?auto=format&fit=crop&w=700&q=80"
             }
         ];
 
-        let products = [];
+        // State Management
         let cart = [];
         let currentCategory = 'all';
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadProducts();
+        // Initialize Page
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts('all');
             updateCartUI();
             lucide.createIcons();
         });
 
-        async function loadProducts() {
-            try {
-                const res = await fetch('/api/products');
-                if (!res.ok) throw new Error('Failed to load products');
-                const data = await res.json();
-                products = Array.isArray(data) && data.length ? data : FALLBACK_PRODUCTS;
-            } catch {
-                products = FALLBACK_PRODUCTS;
-            }
-            renderCategoryFilters();
-            renderProducts(currentCategory);
-        }
-
-        function formatCategoryLabel(category) {
-            if (!category || category === 'all') return 'All Pieces';
-            return category.charAt(0).toUpperCase() + category.slice(1);
-        }
-
-        function renderCategoryFilters() {
-            const container = document.getElementById('category-filters');
-            const categories = ['all', ...new Set(products.map(p => p.category).filter(Boolean))];
-            container.innerHTML = categories.map(cat => {
-                const isActive = cat === currentCategory;
-                const btnClass = isActive
-                    ? 'filter-btn active px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-charcoal text-cream shadow-sm'
-                    : 'filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand';
-                return `<button onclick="filterProducts('${cat}')" data-category="${cat}" class="${btnClass}">${formatCategoryLabel(cat)}</button>`;
-            }).join('');
-        }
-
+        // Render Product Cards
         function renderProducts(category) {
             const grid = document.getElementById('product-grid');
-            const filtered = category === 'all'
-                ? products
+            const filtered = category === 'all' 
+                ? products 
                 : products.filter(p => p.category === category);
 
-            grid.innerHTML = filtered.map(product => {
-                const imgSrc = product.image_url || '/static/cro2.jpeg';
-                return `
+            grid.innerHTML = filtered.map(product => `
                 <article class="group bg-cream rounded-3xl overflow-hidden border border-sand/80 shadow-xs hover:shadow-md transition-all flex flex-col">
+                    <!-- Image Container -->
                     <div class="relative aspect-[4/3] bg-beige overflow-hidden">
-                        <img
-                            src="${imgSrc}"
-                            onerror="this.onerror=null;this.src='/static/cro1.jpeg';"
-                            alt="${product.name}"
+                        <img 
+                            src="${product.image}" 
+                            onerror="this.onerror=null;this.src='https://placehold.co/600x450/EFE7DC/3A322D?text=${encodeURIComponent(product.name)}';"
+                            alt="${product.name}" 
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         >
-                        ${product.badge ? `
                         <span class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full bg-cream/90 backdrop-blur-xs text-xs font-semibold text-charcoal shadow-xs">
                             ${product.badge}
-                        </span>` : ''}
+                        </span>
                     </div>
 
+                    <!-- Content -->
                     <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
                         <div class="space-y-2">
                             <div class="flex items-center justify-between text-xs font-medium text-sage-dark">
-                                <span>${formatCategoryLabel(product.category)}</span>
-                                <span>${product.fiber || ''}</span>
+                                <span>${product.categoryLabel}</span>
+                                <span>${product.fiber}</span>
                             </div>
                             <h3 class="font-serif text-xl font-semibold text-charcoal group-hover:text-terracotta transition-colors">
                                 ${product.name}
                             </h3>
                             <p class="text-sm text-taupe leading-relaxed">
-                                ${product.description || ''}
+                                ${product.description}
                             </p>
                         </div>
 
                         <div class="pt-4 border-t border-sand/60 flex items-center justify-between">
-                            <span class="font-serif text-xl font-semibold text-charcoal">$${Number(product.price).toFixed(0)}</span>
-                            <button
-                                onclick="addToCart(${product.id})"
+                            <span class="font-serif text-xl font-semibold text-charcoal">$${product.price}</span>
+                            <button 
+                                onclick="addToCart(${product.id})" 
                                 class="px-4 py-2.5 rounded-full bg-beige hover:bg-terracotta text-charcoal hover:text-cream text-xs font-semibold transition-colors flex items-center gap-1.5"
                             >
                                 <i data-lucide="plus" class="w-4 h-4"></i>
@@ -554,18 +578,27 @@
                         </div>
                     </div>
                 </article>
-            `;
-            }).join('');
+            `).join('');
 
             lucide.createIcons();
         }
 
+        // Category Filter Handling
         function filterProducts(category) {
             currentCategory = category;
-            renderCategoryFilters();
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.category === category) {
+                    btn.className = 'filter-btn active px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-charcoal text-cream shadow-sm';
+                } else {
+                    btn.className = 'filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand';
+                }
+            });
+
             renderProducts(category);
         }
 
+        // Cart Operations
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
@@ -599,7 +632,7 @@
             const footer = document.getElementById('cart-footer');
 
             const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-            const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * item.qty), 0);
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
             badge.textContent = totalItems;
             subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
@@ -624,11 +657,11 @@
                 footer.classList.remove('hidden');
                 container.innerHTML = cart.map(item => `
                     <div class="flex gap-4 p-3.5 rounded-2xl bg-beige/60 border border-sand/80 items-center">
-                        <img src="${item.image_url || '/static/cro2.jpeg'}" alt="${item.name}" class="w-16 h-16 rounded-xl object-cover shrink-0 bg-sand">
+                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-xl object-cover shrink-0 bg-sand">
                         <div class="flex-1 min-w-0">
                             <h4 class="font-serif text-sm font-semibold text-charcoal truncate">${item.name}</h4>
-                            <p class="text-xs text-taupe">${item.fiber || ''}</p>
-                            <p class="text-sm font-semibold text-terracotta mt-1">$${(Number(item.price) * item.qty).toFixed(2)}</p>
+                            <p class="text-xs text-taupe">${item.fiber}</p>
+                            <p class="text-sm font-semibold text-terracotta mt-1">$${(item.price * item.qty).toFixed(2)}</p>
                         </div>
                         <div class="flex items-center gap-2 bg-cream rounded-full px-2 py-1 border border-sand">
                             <button onclick="updateItemQty(${item.id}, -1)" class="w-6 h-6 rounded-full hover:bg-beige flex items-center justify-center text-charcoal" aria-label="Decrease quantity">
@@ -656,6 +689,7 @@
             menu.classList.toggle('hidden');
         }
 
+        // Swatch Selection in Commission Form
         function selectSwatch(btn, paletteName) {
             document.querySelectorAll('.swatch-btn').forEach(b => {
                 b.className = 'swatch-btn flex items-center gap-2 px-3.5 py-2 rounded-full border border-sand bg-beige/50 text-xs font-medium text-taupe transition-all';
@@ -664,6 +698,7 @@
             document.getElementById('comm-palette').value = paletteName;
         }
 
+        // Form Submissions Connected to Flask Backend
         async function handleCommissionSubmit(e) {
             e.preventDefault();
             const form = e.target;
@@ -707,7 +742,7 @@
             const nameInput = document.getElementById('checkout-name') || form.querySelector('input[type="text"]');
             const customerName = nameInput && nameInput.value ? nameInput.value : email.split('@')[0];
 
-            const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * item.qty), 0);
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const simplifiedItems = cart.map(item => ({
                 id: item.id,
                 name: item.name,
@@ -742,6 +777,7 @@
             }
         }
 
+        // Custom Non-Intrusive Toast Notification System
         function showToast(message) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
