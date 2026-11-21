@@ -81,7 +81,7 @@ def seed_database():
                 fiber="100% Velvet Chenille",
                 badge="Ready to Ship",
                 description="Hand-crocheted plush bear with safety eyes and ultra-soft velvet yarn.",
-                image_url="https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?auto=format&fit=crop&w=800&q=80",
+                image_url="\static\cro2.jpeg",
             ),
             Product(
                 name="Heirloom Waffle Throw",
@@ -90,7 +90,7 @@ def seed_database():
                 fiber="Merino Wool Blend",
                 badge="Made to Order",
                 description="Textured waffle-stitch throw blanket in warm oatmeal cream.",
-                image_url="https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=800&q=80",
+                image_url="\static\cro3.jpeg",
             ),
             Product(
                 name="Meadow Granny Square Tote",
@@ -99,7 +99,7 @@ def seed_database():
                 fiber="Combed Organic Cotton",
                 badge="1 Left",
                 description="Sturdy floral granny square shoulder bag lined with unbleached cotton.",
-                image_url="https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80",
+                image_url="\static\cro4.jpeg",
             ),
         ]
         db.session.bulk_save_objects(sample_products)
