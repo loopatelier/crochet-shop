@@ -54,9 +54,9 @@ def seed_products():
             img src="/static/cro2.jpeg",
         ),
         Product(
-            name="Barnaby the Chunky Bear",
-            category="amigurumi",
-            price=48.00,
+            name="daisy keychain",
+            category="Keychains",
+            price=75.00,
             fiber="100% Velvet Chenille",
             badge="Ready to Ship",
             description="Hand-crocheted plush bear with safety eyes and ultra-soft velvet.",
