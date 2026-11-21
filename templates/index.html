@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loops & Loom | Handcrafted Artisanal Crochet</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fraunces (warm editorial serif) and Plus Jakarta Sans (clean inviting sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#FAF6F0',
+                        beige: '#EFE7DC',
+                        sand: '#E4D8C8',
+                        terracotta: {
+                            DEFAULT: '#C86D51',
+                            hover: '#B35B40',
+                            light: '#F4E3DD'
+                        },
+                        sage: {
+                            DEFAULT: '#7C9082',
+                            dark: '#5E7063',
+                            light: '#E6ECE8'
+                        },
+                        charcoal: '#3A322D',
+                        taupe: '#6E6259'
+                    },
+                    fontFamily: {
+                        serif: ['Fraunces', 'Georgia', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-cream text-charcoal font-sans antialiased selection:bg-terracotta/20 selection:text-terracotta">
+
+    <!-- Toast Notification Banner (Replaces alert) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Navigation Bar -->
+    <header class="sticky top-0 z-40 bg-cream/90 backdrop-blur-md border-b border-sand/60">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-2.5 group">
+                <div class="w-10 h-10 rounded-full bg-terracotta text-cream flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                    <!-- Custom Yarn Ball SVG Icon -->
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M5.5 8.5c4-1 9 1 13 5"/>
+                        <path d="M4.5 13.5c4.5-1.5 10.5.5 14.5 4"/>
+                        <path d="M9 3.5c-1 4.5 1 10.5 5 15.5"/>
+                        <path d="M14.5 3.5c-2 4-1.5 10 1.5 15.5"/>
+                        <path d="M19 18c2 1 3 3 3 3"/>
+                    </svg>
+                </div>
+                <span class="font-serif text-2xl font-semibold tracking-tight text-charcoal">Loops & Loom</span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-taupe">
+                <a href="#shop" class="hover:text-terracotta transition-colors">Shop Collection</a>
+                <a href="#about" class="hover:text-terracotta transition-colors">Our Story</a>
+                <a href="#commissions" class="hover:text-terracotta transition-colors">Custom Orders</a>
+            </nav>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-3">
+                <button onclick="toggleCart()" class="relative p-2.5 rounded-full bg-beige hover:bg-sand text-charcoal transition-colors flex items-center gap-2 px-4" aria-label="Open Cart">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 text-terracotta"></i>
+                    <span class="text-sm font-semibold hidden sm:inline">Basket</span>
+                    <span id="cart-badge" class="bg-terracotta text-cream text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                </button>
+                
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2.5 rounded-full bg-beige text-charcoal hover:bg-sand" aria-label="Menu">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-cream border-b border-sand px-6 py-4 space-y-3">
+            <a href="#shop" onclick="toggleMobileMenu()" class="block py-2 text-base font-medium text-charcoal hover:text-terracotta">Shop Collection</a>
+            <a href="#about" onclick="toggleMobileMenu()" class="block py-2 text-base font-medium text-charcoal hover:text-terracotta">Our Story</a>
+            <a href="#commissions" onclick="toggleMobileMenu()" class="block py-2 text-base font-medium text-charcoal hover:text-terracotta">Custom Orders</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="relative overflow-hidden py-14 sm:py-20 lg:py-24">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    <!-- Hero Copy -->
+                    <div class="lg:col-span-6 space-y-6 text-center lg:text-left">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sage-light text-sage-dark text-xs font-semibold uppercase tracking-wider">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                            <span>Slow-made with 100% Natural Fibers</span>
+                        </div>
+                        <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold text-charcoal leading-[1.15]">
+                            Stitched with warmth, crafted to be <span class="italic text-terracotta font-normal">cherished.</span>
+                        </h1>
+                        <p class="text-base sm:text-lg text-taupe max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                            Welcome to Loops & Loom. Every heirloom blanket, whimsical amigurumi companion, and cozy wearable is thoughtfully crocheted by hand using ethically sourced cotton and merino wool.
+                        </p>
+                        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                            <a href="#shop" class="w-full sm:w-auto px-7 py-3.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-cream font-semibold text-sm shadow-sm transition-all text-center">
+                                Explore the Collection
+                            </a>
+                            <a href="#commissions" class="w-full sm:w-auto px-7 py-3.5 rounded-full bg-beige hover:bg-sand text-charcoal font-semibold text-sm transition-all text-center">
+                                Request Custom Piece
+                            </a>
+                        </div>
+                        <!-- Trust Indicators -->
+                        <div class="pt-6 border-t border-sand/80 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs font-medium text-taupe">
+                            <div class="flex items-center gap-1.5">
+                                <i data-lucide="heart" class="w-4 h-4 text-terracotta"></i>
+                                <span>100% Handmade</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i data-lucide="leaf" class="w-4 h-4 text-sage"></i>
+                                <span>Organic Yarns</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i data-lucide="gift" class="w-4 h-4 text-terracotta"></i>
+                                <span>Plastic-Free Packaging</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hero Visual Showcase -->
+                    <div class="lg:col-span-6 relative">
+                        <div class="relative rounded-3xl overflow-hidden shadow-xl bg-beige aspect-[4/3] border-4 border-white">
+                            <img 
+                                src="https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?auto=format&fit=crop&w=1000&q=80" 
+                                onerror="this.onerror=null;this.src='https://placehold.co/800x600/EFE7DC/3A322D?text=Handcrafted+Crochet+Collection';"
+                                alt="Cozy textured handmade crochet blankets and yarn" 
+                                class="w-full h-full object-cover"
+                            >
+                        </div>
+                        <!-- Floating Maker Note Card -->
+                        <div class="hidden sm:flex items-center gap-3.5 bg-cream/95 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-sand max-w-xs absolute -bottom-6 -left-6">
+                            <div class="w-12 h-12 rounded-xl bg-sage-light text-sage-dark flex items-center justify-center shrink-0">
+                                <i data-lucide="clock" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="font-serif font-semibold text-sm text-charcoal">Autumn Batch Live</p>
+                                <p class="text-xs text-taupe">Small-batch pieces ready to ship in 2–3 days.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Gallery & Shop Section -->
+        <section id="shop" class="py-16 sm:py-20 bg-beige/50 border-y border-sand/60">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Section Header -->
+                <div class="text-center max-w-2xl mx-auto mb-10 space-y-3">
+                    <span class="text-xs font-bold uppercase tracking-widest text-sage-dark">Curated Goods</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-semibold text-charcoal">Handmade Creations</h2>
+                    <p class="text-taupe text-sm sm:text-base">Browse ready-to-ship treasures or select a made-to-order piece tailored in your favorite colorway.</p>
+                </div>
+
+                <!-- Category Filter Pills -->
+                <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-12" id="category-filters">
+                    <button onclick="filterProducts('all')" data-category="all" class="filter-btn active px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-charcoal text-cream shadow-sm">
+                        All Pieces
+                    </button>
+                    <button onclick="filterProducts('amigurumi')" data-category="amigurumi" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand">
+                        Amigurumi
+                    </button>
+                    <button onclick="filterProducts('blankets')" data-category="blankets" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand">
+                        Blankets & Throws
+                    </button>
+                    <button onclick="filterProducts('wearables')" data-category="wearables" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand">
+                        Wearables
+                    </button>
+                    <button onclick="filterProducts('custom')" data-category="custom" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand">
+                        Custom Slots
+                    </button>
+                </div>
+
+                <!-- Product Grid -->
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Products injected dynamically via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- About the Maker Section -->
+        <section id="about" class="py-16 sm:py-24">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-beige rounded-3xl p-6 sm:p-12 lg:p-16 border border-sand/80 shadow-sm">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+                        <!-- Maker Image -->
+                        <div class="lg:col-span-5">
+                            <div class="relative rounded-2xl overflow-hidden aspect-[4/5] shadow-md border-4 border-cream">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=800&q=80" 
+                                    onerror="this.onerror=null;this.src='https://placehold.co/600x750/E4D8C8/3A322D?text=Clara+in+Her+Studio';"
+                                    alt="Maker crocheting with warm yarn" 
+                                    class="w-full h-full object-cover"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Maker Story -->
+                        <div class="lg:col-span-7 space-y-6">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-terracotta-light text-terracotta text-xs font-semibold uppercase tracking-wider">
+                                About the Maker
+                            </div>
+                            <h2 class="font-serif text-3xl sm:text-4xl font-semibold text-charcoal leading-tight">
+                                Hello, I'm Clara — the hands & heart behind every stitch.
+                            </h2>
+                            <div class="space-y-4 text-taupe text-sm sm:text-base leading-relaxed">
+                                <p>
+                                    My love affair with fiber arts began ten years ago on my grandmother's sunlit porch, learning how a simple wooden hook and a skein of wool could transform into something deeply comforting.
+                                </p>
+                                <p>
+                                    In a world of fast-paced mass production, <strong>Loops & Loom</strong> is my love letter to slow living. Every piece takes anywhere from six to forty hours to complete, crafted in my cozy home studio with a warm mug of chamomile tea nearby.
+                                </p>
+                                <p>
+                                    I exclusively source OEKO-TEX® certified organic cottons,undyed alpaca blends, and botanical-dyed merino wools so that each item feels gentle against sensitive skin and lasts for generations.
+                                </p>
+                            </div>
+
+                            <!-- Studio Stats -->
+                            <div class="grid grid-cols-3 gap-4 pt-4 border-t border-sand">
+                                <div>
+                                    <p class="font-serif text-2xl sm:text-3xl font-semibold text-terracotta">100%</p>
+                                    <p class="text-xs text-taupe mt-1">Natural & Eco Fibers</p>
+                                </div>
+                                <div>
+                                    <p class="font-serif text-2xl sm:text-3xl font-semibold text-sage-dark">450+</p>
+                                    <p class="text-xs text-taupe mt-1">Heirlooms Delivered</p>
+                                </div>
+                                <div>
+                                    <p class="font-serif text-2xl sm:text-3xl font-semibold text-charcoal">Zero</p>
+                                    <p class="text-xs text-taupe mt-1">Synthetic Plastics</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Custom Commission Request Form Section -->
+        <section id="commissions" class="py-16 sm:py-20 bg-sage-light/50 border-t border-sand/60">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-xl mx-auto mb-12 space-y-3">
+                    <span class="text-xs font-bold uppercase tracking-widest text-terracotta">Bespoke Creations</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-semibold text-charcoal">Commission a Custom Piece</h2>
+                    <p class="text-taupe text-sm sm:text-base">
+                        Have a specific nursery palette, a beloved pet amigurumi, or a custom-sized heirloom blanket in mind? Share your vision below.
+                    </p>
+                </div>
+
+                <form id="commission-form" onsubmit="handleCommissionSubmit(event)" class="bg-cream rounded-3xl p-6 sm:p-10 shadow-sm border border-sand space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Name -->
+                        <div>
+                            <label for="comm-name" class="block text-sm font-semibold text-charcoal mb-2">Your Name *</label>
+                            <input type="text" id="comm-name" required placeholder="e.g., Maya Lin" class="w-full px-4 py-3 rounded-xl bg-beige/60 border border-sand focus:border-terracotta focus:ring-2 focus:ring-terracotta/20 outline-none transition-all text-sm">
+                        </div>
+                        <!-- Email -->
+                        <div>
+                            <label for="comm-email" class="block text-sm font-semibold text-charcoal mb-2">Email Address *</label>
+                            <input type="email" id="comm-email" required placeholder="maya@example.com" class="w-full px-4 py-3 rounded-xl bg-beige/60 border border-sand focus:border-terracotta focus:ring-2 focus:ring-terracotta/20 outline-none transition-all text-sm">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Project Category -->
+                        <div>
+                            <label for="comm-type" class="block text-sm font-semibold text-charcoal mb-2">Project Type</label>
+                            <select id="comm-type" class="w-full px-4 py-3 rounded-xl bg-beige/60 border border-sand focus:border-terracotta focus:ring-2 focus:ring-terracotta/20 outline-none transition-all text-sm text-charcoal">
+                                <option value="Custom Amigurumi">Custom Amigurumi / Plushie</option>
+                                <option value="Heirloom Blanket">Heirloom Baby or Throw Blanket</option>
+                                <option value="Bespoke Wearable">Cardigan, Shawl, or Hat</option>
+                                <option value="Home Decor">Baskets, Pillows, or Wall Hanging</option>
+                            </select>
+                        </div>
+
+                        <!-- Preferred Timeline -->
+                        <div>
+                            <label for="comm-timeline" class="block text-sm font-semibold text-charcoal mb-2">Needed By (Optional)</label>
+                            <input type="date" id="comm-timeline" class="w-full px-4 py-3 rounded-xl bg-beige/60 border border-sand focus:border-terracotta focus:ring-2 focus:ring-terracotta/20 outline-none transition-all text-sm text-charcoal">
+                        </div>
+                    </div>
+
+                    <!-- Interactive Color Palette Picker -->
+                    <div>
+                        <label class="block text-sm font-semibold text-charcoal mb-2.5">Preferred Yarn Palette</label>
+                        <div class="flex flex-wrap gap-3" id="yarn-swatches">
+                            <button type="button" onclick="selectSwatch(this, 'Warm Terracotta & Cream')" class="swatch-btn flex items-center gap-2 px-3.5 py-2 rounded-full border-2 border-terracotta bg-terracotta-light/40 text-xs font-semibold text-charcoal transition-all">
+                                <span class="w-4 h-4 rounded-full bg-[#C86D51] border border-black/10"></span>
+                                Terracotta & Cream
+                            </button>
+                            <button type="button" onclick="selectSwatch(this, 'Sage & Oatmeal')" class="swatch-btn flex items-center gap-2 px-3.5 py-2 rounded-full border border-sand bg-beige/50 text-xs font-medium text-taupe hover:border-sage transition-all">
+                                <span class="w-4 h-4 rounded-full bg-[#7C9082] border border-black/10"></span>
+                                Sage & Oatmeal
+                            </button>
+                            <button type="button" onclick="selectSwatch(this, 'Honey Mustard & Rust')" class="swatch-btn flex items-center gap-2 px-3.5 py-2 rounded-full border border-sand bg-beige/50 text-xs font-medium text-taupe hover:border-amber-600 transition-all">
+                                <span class="w-4 h-4 rounded-full bg-[#D49B4B] border border-black/10"></span>
+                                Honey & Rust
+                            </button>
+                            <button type="button" onclick="selectSwatch(this, 'Dusty Rose & Sand')" class="swatch-btn flex items-center gap-2 px-3.5 py-2 rounded-full border border-sand bg-beige/50 text-xs font-medium text-taupe hover:border-rose-400 transition-all">
+                                <span class="w-4 h-4 rounded-full bg-[#D69E9E] border border-black/10"></span>
+                                Dusty Rose & Sand
+                            </button>
+                        </div>
+                        <input type="hidden" id="comm-palette" value="Warm Terracotta & Cream">
+                    </div>
+
+                    <!-- Project Vision Description -->
+                    <div>
+                        <label for="comm-details" class="block text-sm font-semibold text-charcoal mb-2">Tell me about your idea *</label>
+                        <textarea id="comm-details" rows="4" required placeholder="Describe dimensions, textures, special details, or the occasion you're celebrating..." class="w-full px-4 py-3 rounded-xl bg-beige/60 border border-sand focus:border-terracotta focus:ring-2 focus:ring-terracotta/20 outline-none transition-all text-sm"></textarea>
+                    </div>
+
+                    <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p class="text-xs text-taupe flex items-center gap-1.5">
+                            <i data-lucide="info" class="w-4 h-4 text-sage-dark shrink-0"></i>
+                            Clara responds with a custom quote & yarn sample photos within 48 hours.
+                        </p>
+                        <button type="submit" class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-cream font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2">
+                            <span>Send Inquiry</span>
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-charcoal text-beige py-14">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-10 pb-10 border-b border-taupe/30">
+                <!-- Brand Info -->
+                <div class="md:col-span-5 space-y-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-full bg-terracotta text-cream flex items-center justify-center">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                        </div>
+                        <span class="font-serif text-2xl font-semibold text-cream">Loops & Loom</span>
+                    </div>
+                    <p class="text-sm text-sand/80 max-w-sm leading-relaxed">
+                        Heirloom-quality crochet pieces made slowly by hand. Bringing warmth, texture, and mindful craftsmanship into your everyday spaces.
+                    </p>
+                    <!-- Social Links -->
+                    <div class="flex items-center gap-3 pt-2">
+                        <a href="#social-ig" onclick="showToast('Opening Instagram @loopsandloom')" class="w-10 h-10 rounded-full bg-taupe/30 hover:bg-terracotta text-cream flex items-center justify-center transition-colors" aria-label="Instagram">
+                            <i data-lucide="instagram" class="w-4 h-4"></i>
+                        </a>
+                        <a href="#social-pin" onclick="showToast('Opening Pinterest Lookbook')" class="w-10 h-10 rounded-full bg-taupe/30 hover:bg-terracotta text-cream flex items-center justify-center transition-colors" aria-label="Pinterest">
+                            <i data-lucide="bookmark" class="w-4 h-4"></i>
+                        </a>
+                        <a href="#social-yt" onclick="showToast('Opening Studio Vlog Channel')" class="w-10 h-10 rounded-full bg-taupe/30 hover:bg-terracotta text-cream flex items-center justify-center transition-colors" aria-label="YouTube">
+                            <i data-lucide="youtube" class="w-4 h-4"></i>
+                        </a>
+                        <a href="mailto:hello@loopsandloom.example" class="w-10 h-10 rounded-full bg-taupe/30 hover:bg-terracotta text-cream flex items-center justify-center transition-colors" aria-label="Email">
+                            <i data-lucide="mail" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="md:col-span-3 space-y-3">
+                    <h4 class="font-serif text-base font-semibold text-cream">Explore</h4>
+                    <ul class="space-y-2 text-sm text-sand/80">
+                        <li><a href="#shop" onclick="filterProducts('amigurumi')" class="hover:text-terracotta transition-colors">Amigurumi Friends</a></li>
+                        <li><a href="#shop" onclick="filterProducts('blankets')" class="hover:text-terracotta transition-colors">Heirloom Blankets</a></li>
+                        <li><a href="#shop" onclick="filterProducts('wearables')" class="hover:text-terracotta transition-colors">Cozy Wearables</a></li>
+                        <li><a href="#commissions" class="hover:text-terracotta transition-colors">Custom Commissions</a></li>
+                    </ul>
+                </div>
+
+                <!-- Care & Studio Info -->
+                <div class="md:col-span-4 space-y-3">
+                    <h4 class="font-serif text-base font-semibold text-cream">Fiber Care & Notes</h4>
+                    <p class="text-xs text-sand/75 leading-relaxed">
+                        All natural wool & cotton pieces should be gently hand-washed in cool water with mild wool wash and laid flat to dry to preserve their stitch definition for decades.
+                    </p>
+                    <p class="text-xs text-sage font-medium pt-1">
+                        ● Currently booking custom slots for next month
+                    </p>
+                </div>
+            </div>
+
+            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-sand/60">
+                <p>&copy; 2026 Loops & Loom Artisanal Studio. All rights reserved.</p>
+                <p>Hand-coded & stitched with love.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Shopping Cart / Order Inquiry Drawer Modal -->
+    <div id="cart-modal" class="fixed inset-0 z-50 hidden">
+        <!-- Backdrop -->
+        <div onclick="toggleCart()" class="fixed inset-0 bg-charcoal/50 backdrop-blur-xs transition-opacity"></div>
+        
+        <!-- Slide-over Panel -->
+        <div class="fixed inset-y-0 right-0 max-w-md w-full bg-cream shadow-2xl border-l border-sand flex flex-col z-10">
+            <!-- Drawer Header -->
+            <div class="p-6 border-b border-sand flex items-center justify-between bg-beige/50">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 text-terracotta"></i>
+                    <h3 class="font-serif text-xl font-semibold text-charcoal">Your Yarn Basket</h3>
+                </div>
+                <button onclick="toggleCart()" class="p-2 rounded-full hover:bg-sand/70 text-taupe hover:text-charcoal transition-colors" aria-label="Close Cart">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Cart Items List -->
+            <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <!-- Items populated dynamically -->
+            </div>
+
+            <!-- Cart Footer / Checkout Inquiry -->
+            <div id="cart-footer" class="p-6 border-t border-sand bg-beige/40 space-y-4">
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-sm text-taupe">
+                        <span>Estimated Subtotal</span>
+                        <span id="cart-subtotal" class="font-semibold text-charcoal">$0.00</span>
+                    </div>
+                    <p class="text-xs text-taupe">Complimentary plastic-free shipping on orders over $120.</p>
+                </div>
+
+                <!-- Quick Order / Inquiry Submission inside Cart -->
+                <form onsubmit="submitBasketOrder(event)" class="space-y-3 pt-2">
+                    <input type="email" id="checkout-email" required placeholder="Enter your email to reserve & checkout..." class="w-full px-4 py-2.5 rounded-xl bg-cream border border-sand text-sm focus:border-terracotta outline-none">
+                    <button type="submit" class="w-full py-3.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-cream font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2">
+                        <span>Complete Order Inquiry</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Product Catalog Data
+        const products = [
+            {
+                id: 1,
+                name: "Barnaby the Woodland Bear",
+                category: "amigurumi",
+                categoryLabel: "Amigurumi",
+                price: 48,
+                fiber: "100% Organic Cotton",
+                badge: "Ready to Ship",
+                description: "Soft-stuffed heirloom bear wearing a removable sage green knitted scarf. Safe embroidered eyes.",
+                image: "https://images.unsplash.com/photo-1618842676088-c4d48a6a7c9d?auto=format&fit=crop&w=700&q=80"
+            },
+            {
+                id: 2,
+                name: "Meadowlark Waffle Throw",
+                category: "blankets",
+                categoryLabel: "Blankets",
+                price: 165,
+                fiber: "Merino Wool & Cotton",
+                badge: "Bestseller",
+                description: "Deeply textured waffle-stitch throw blanket in warm oatmeal cream. Measures 50\" x 60\".",
+                image: "https://images.unsplash.com/photo-1580301762395-21ce84d00bc6?auto=format&fit=crop&w=700&q=80"
+            },
+            {
+                id: 3,
+                name: "Autumn Berry Slouch Cardigan",
+                category: "wearables",
+                categoryLabel: "Wearables",
+                price: 135,
+                fiber: "Alpaca & Silk Blend",
+                badge: "Made to Order",
+                description: "Chunky balloon-sleeve cardigan in rich terracotta with hand-carved wooden buttons.",
+                image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=700&q=80"
+            },
+            {
+                id: 4,
+                name: "Cottagecore Mushroom Duo",
+                category: "amigurumi",
+                categoryLabel: "Amigurumi",
+                price: 36,
+                fiber: "Botanical Dyed Cotton",
+                badge: "Ready to Ship",
+                description: "Pair of pocket-sized forest toadstools weighted with natural flaxseeds for shelf styling or play.",
+                image: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=700&q=80"
+            },
+            {
+                id: 5,
+                name: "Botanical Granny Square Tote",
+                category: "wearables",
+                categoryLabel: "Wearables",
+                price: 64,
+                fiber: "Unbleached Hemp & Cotton",
+                badge: "Ready to Ship",
+                description: "Sturdy market tote featuring daisy motifs on a sage green backdrop with reinforced straps.",
+                image: "https://images.unsplash.com/photo-1590874103328-eac38a689ce7?auto=format&fit=crop&w=700&q=80"
+            },
+            {
+                id: 6,
+                name: "Bespoke Commission Deposit",
+                category: "custom",
+                categoryLabel: "Custom Orders",
+                price: 50,
+                fiber: "Your Choice of Yarn",
+                badge: "2 Slots Left",
+                description: "Reserve your spot on Clara's studio calendar for a custom-designed heirloom or pet portrait.",
+                image: "https://images.unsplash.com/photo-1544967082-d9d25d867d66?auto=format&fit=crop&w=700&q=80"
+            }
+        ];
+
+        // State Management
+        let cart = [];
+        let currentCategory = 'all';
+
+        // Initialize Page
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts('all');
+            updateCartUI();
+            lucide.createIcons();
+        });
+
+        // Render Product Cards
+        function renderProducts(category) {
+            const grid = document.getElementById('product-grid');
+            const filtered = category === 'all' 
+                ? products 
+                : products.filter(p => p.category === category);
+
+            grid.innerHTML = filtered.map(product => `
+                <article class="group bg-cream rounded-3xl overflow-hidden border border-sand/80 shadow-xs hover:shadow-md transition-all flex flex-col">
+                    <!-- Image Container -->
+                    <div class="relative aspect-[4/3] bg-beige overflow-hidden">
+                        <img 
+                            src="${product.image}" 
+                            onerror="this.onerror=null;this.src='https://placehold.co/600x450/EFE7DC/3A322D?text=${encodeURIComponent(product.name)}';"
+                            alt="${product.name}" 
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        >
+                        <span class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full bg-cream/90 backdrop-blur-xs text-xs font-semibold text-charcoal shadow-xs">
+                            ${product.badge}
+                        </span>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-xs font-medium text-sage-dark">
+                                <span>${product.categoryLabel}</span>
+                                <span>${product.fiber}</span>
+                            </div>
+                            <h3 class="font-serif text-xl font-semibold text-charcoal group-hover:text-terracotta transition-colors">
+                                ${product.name}
+                            </h3>
+                            <p class="text-sm text-taupe leading-relaxed">
+                                ${product.description}
+                            </p>
+                        </div>
+
+                        <div class="pt-4 border-t border-sand/60 flex items-center justify-between">
+                            <span class="font-serif text-xl font-semibold text-charcoal">$${product.price}</span>
+                            <button 
+                                onclick="addToCart(${product.id})" 
+                                class="px-4 py-2.5 rounded-full bg-beige hover:bg-terracotta text-charcoal hover:text-cream text-xs font-semibold transition-colors flex items-center gap-1.5"
+                            >
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                <span>Add to Basket</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        // Category Filter Handling
+        function filterProducts(category) {
+            currentCategory = category;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.category === category) {
+                    btn.className = 'filter-btn active px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-charcoal text-cream shadow-sm';
+                } else {
+                    btn.className = 'filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand';
+                }
+            });
+
+            renderProducts(category);
+        }
+
+        // Cart Operations
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.qty += 1;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+
+            updateCartUI();
+            showToast(`Added "${product.name}" to your basket`);
+        }
+
+        function updateItemQty(productId, delta) {
+            const itemIndex = cart.findIndex(item => item.id === productId);
+            if (itemIndex === -1) return;
+
+            cart[itemIndex].qty += delta;
+            if (cart[itemIndex].qty <= 0) {
+                cart.splice(itemIndex, 1);
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const badge = document.getElementById('cart-badge');
+            const container = document.getElementById('cart-items-container');
+            const subtotalEl = document.getElementById('cart-subtotal');
+            const footer = document.getElementById('cart-footer');
+
+            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            badge.textContent = totalItems;
+            subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
+
+            if (cart.length === 0) {
+                footer.classList.add('hidden');
+                container.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center text-center py-12 space-y-4">
+                        <div class="w-16 h-16 rounded-full bg-beige flex items-center justify-center text-taupe">
+                            <i data-lucide="shopping-bag" class="w-7 h-7"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="font-serif text-lg font-semibold text-charcoal">Your basket is empty</p>
+                            <p class="text-xs text-taupe max-w-xs">Explore our handmade blankets, amigurumi, and wearables to add something cozy.</p>
+                        </div>
+                        <button onclick="toggleCart()" class="px-5 py-2.5 rounded-full bg-terracotta text-cream text-xs font-semibold">
+                            Browse Collection
+                        </button>
+                    </div>
+                `;
+            } else {
+                footer.classList.remove('hidden');
+                container.innerHTML = cart.map(item => `
+                    <div class="flex gap-4 p-3.5 rounded-2xl bg-beige/60 border border-sand/80 items-center">
+                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-xl object-cover shrink-0 bg-sand">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-serif text-sm font-semibold text-charcoal truncate">${item.name}</h4>
+                            <p class="text-xs text-taupe">${item.fiber}</p>
+                            <p class="text-sm font-semibold text-terracotta mt-1">$${(item.price * item.qty).toFixed(2)}</p>
+                        </div>
+                        <div class="flex items-center gap-2 bg-cream rounded-full px-2 py-1 border border-sand">
+                            <button onclick="updateItemQty(${item.id}, -1)" class="w-6 h-6 rounded-full hover:bg-beige flex items-center justify-center text-charcoal" aria-label="Decrease quantity">
+                                <i data-lucide="minus" class="w-3 h-3"></i>
+                            </button>
+                            <span class="text-xs font-semibold w-4 text-center">${item.qty}</span>
+                            <button onclick="updateItemQty(${item.id}, 1)" class="w-6 h-6 rounded-full hover:bg-beige flex items-center justify-center text-charcoal" aria-label="Increase quantity">
+                                <i data-lucide="plus" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            lucide.createIcons();
+        }
+
+        function toggleCart() {
+            const modal = document.getElementById('cart-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Swatch Selection in Commission Form
+        function selectSwatch(btn, paletteName) {
+            document.querySelectorAll('.swatch-btn').forEach(b => {
+                b.className = 'swatch-btn flex items-center gap-2 px-3.5 py-2 rounded-full border border-sand bg-beige/50 text-xs font-medium text-taupe transition-all';
+            });
+            btn.className = 'swatch-btn flex items-center gap-2 px-3.5 py-2 rounded-full border-2 border-terracotta bg-terracotta-light/40 text-xs font-semibold text-charcoal transition-all';
+            document.getElementById('comm-palette').value = paletteName;
+        }
+
+        // Form Submissions Connected to Flask Backend
+        async function handleCommissionSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const name = document.getElementById('comm-name')?.value || 'Guest';
+            const emailInput = document.getElementById('comm-email') || form.querySelector('input[type="email"]');
+            const email = emailInput ? emailInput.value : '';
+            const type = document.getElementById('comm-type')?.value || 'Custom Piece';
+            const palette = document.getElementById('comm-palette')?.value || 'Natural Cream';
+            const notesInput = document.getElementById('comm-notes') || document.getElementById('comm-details') || form.querySelector('textarea');
+            const details = notesInput ? notesInput.value : '';
+
+            try {
+                const response = await fetch('/api/commissions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        project_type: type,
+                        yarn_color: palette,
+                        details: details
+                    })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    showToast(`Thank you, ${name}! Your ${type} inquiry (#${result.inquiry_id}) has been saved.`);
+                    form.reset();
+                } else {
+                    showToast(result.error || 'Could not save inquiry. Please check your email.');
+                }
+            } catch (err) {
+                showToast('Network error connecting to studio server.');
+            }
+        }
+
+        async function submitBasketOrder(e) {
+            e.preventDefault();
+            const form = e.target;
+            const email = document.getElementById('checkout-email').value;
+            const nameInput = document.getElementById('checkout-name') || form.querySelector('input[type="text"]');
+            const customerName = nameInput && nameInput.value ? nameInput.value : email.split('@')[0];
+
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const simplifiedItems = cart.map(item => ({
+                id: item.id,
+                name: item.name,
+                qty: item.qty,
+                price: item.price
+            }));
+
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: customerName,
+                        email: email,
+                        items: simplifiedItems,
+                        total: subtotal
+                    })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    cart = [];
+                    updateCartUI();
+                    toggleCart();
+                    showToast(`Order #${result.order_id} confirmed! Invoice sent to ${email}.`);
+                    form.reset();
+                } else {
+                    showToast(result.error || 'Could not place order.');
+                }
+            } catch (err) {
+                showToast('Network error connecting to studio server.');
+            }
+        }
+
+        // Custom Non-Intrusive Toast Notification System
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'pointer-events-auto flex items-center gap-3 bg-charcoal text-cream px-5 py-3.5 rounded-2xl shadow-lg border border-taupe/40 text-sm font-medium transform transition-all duration-300 translate-y-2 opacity-0';
+            toast.innerHTML = `
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-sage shrink-0"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
