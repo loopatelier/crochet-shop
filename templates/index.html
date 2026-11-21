@@ -356,24 +356,56 @@
       finally{button.disabled=false;button.innerHTML='Send Inquiry <i data-lucide="send" class="w-4 h-4"></i>';lucide.createIcons();}
     }
 
-    async function submitBasketOrder(event){
-      event.preventDefault();
-      if(!cart.length){showToast('Your basket is empty.');return;}
-      const form=event.target;
-      const button=document.getElementById('checkout-submit');
-      button.disabled=true;button.textContent='Submitting…';
-      const email=document.getElementById('checkout-email').value.trim();
-      const name=document.getElementById('checkout-name').value.trim();
-      const items=cart.map(item=>({id:item.id,qty:item.qty}));
-      try{
-        const response=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,items})});
-        const result=await response.json();
-        if(!response.ok)throw new Error(result.error||'Could not submit your order.');
-        cart=[];updateCartUI();toggleCart();form.reset();
-        showToast(`Order inquiry #${result.order_id} saved. Total: ${money(result.total)}.`);
-      }catch(error){showToast(error.message||'Network error. Please try again.');}
-      finally{button.disabled=false;button.textContent='Place Order Inquiry';}
+    async function submitBasketOrder(e) {
+    e.preventDefault();
+    const form = e.target;
+    const emailEl = document.getElementById('checkout-email') || form.querySelector('input[type="email"]');
+    const nameEl = document.getElementById('checkout-name') || form.querySelector('input[type="text"]');
+    const email = (emailEl ? emailEl.value : '').trim();
+    const customerName = (nameEl && nameEl.value.trim()) ? nameEl.value.trim() : email.split('@')[0];
+
+    const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * item.qty), 0);
+    const simplifiedItems = cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        qty: item.qty,
+        price: item.price
+    }));
+
+    try {
+        const response = await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: customerName,
+                email: email,
+                items: simplifiedItems,
+                total: subtotal
+            })
+        });
+
+        const rawText = await response.text();
+        let result = {};
+        try {
+            result = rawText ? JSON.parse(rawText) : {};
+        } catch {
+            showToast(`Order failed (HTTP ${response.status}). Server returned HTML instead of JSON.`);
+            return;
+        }
+
+        if (response.ok) {
+            cart = [];
+            updateCartUI();
+            toggleCart();
+            showToast(`Order #${result.order_id} confirmed! Invoice sent to ${email}.`);
+            form.reset();
+        } else {
+            showToast(result.error || `Could not place order (HTTP ${response.status}).`);
+        }
+    } catch (err) {
+        showToast('Network error connecting to studio server.');
     }
+}
 
     function showToast(message){
       const container=document.getElementById('toast-container');
