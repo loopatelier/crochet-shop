@@ -9,6 +9,7 @@ from flask import (
     request, session, url_for
 )
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import inspect
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
@@ -45,10 +46,16 @@ class Product(db.Model):
 
     def to_dict(self):
         return {
-            "id": self.id, "name": self.name, "category": self.category,
-            "price": self.price, "fiber": self.fiber, "badge": self.badge,
-            "description": self.description, "image_url": self.image_url,
-            "stock": self.stock, "active": self.active
+            "id": self.id,
+            "name": self.name,
+            "category": self.category,
+            "price": self.price,
+            "fiber": self.fiber,
+            "badge": self.badge,
+            "description": self.description,
+            "image_url": self.image_url,
+            "stock": self.stock,
+            "active": self.active,
         }
 
 
@@ -131,56 +138,99 @@ def seed_products():
     if Product.query.first():
         return
     samples = [
-        Product(name="Strawberry Bag Charm", category="Keychains", price=100,
-                fiber="Soft Cotton & Milk Yarn", badge="Bestseller",
-                description="Handcrafted crochet strawberry bag charm.",
-                image_url="/static/cro2.jpeg", stock=10),
-        Product(name="Daisy Keychain", category="Keychains", price=75,
-                fiber="Velvet Chenille", badge="Ready to Ship",
-                description="Beautiful handmade crochet daisy keychain.",
-                image_url="/static/cro3.jpeg", stock=12),
-        Product(name="Heirloom Waffle Throw", category="Blankets", price=145,
-                fiber="Merino Wool Blend", badge="Made to Order",
-                description="Textured waffle-stitch throw blanket.",
-                image_url="/static/cro4.jpeg", stock=3),
-        Product(name="Meadow Granny Square Tote", category="Wearables", price=620,
-                fiber="Mercerized Cotton", badge="New",
-                description="Handmade granny square tote bag.",
-                image_url="/static/cro5.jpeg", stock=5),
-        Product(name="Mini Charm & Keychain Trio", category="Accessories", price=240,
-                fiber="Fine Yarn & Beaded Accents", badge="Limited",
-                description="Handmade charms for bags and keys.",
-                image_url="/static/cro6.jpeg", stock=8),
+        Product(
+            name="Strawberry Bag Charm",
+            category="Keychains",
+            price=100,
+            fiber="Soft Cotton & Milk Yarn",
+            badge="Bestseller",
+            description="Handcrafted crochet strawberry bag charm.",
+            image_url="/static/cro2.jpeg",
+            stock=10,
+        ),
+        Product(
+            name="Daisy Keychain",
+            category="Keychains",
+            price=75,
+            fiber="Velvet Chenille",
+            badge="Ready to Ship",
+            description="Beautiful handmade crochet daisy keychain.",
+            image_url="/static/cro3.jpeg",
+            stock=12,
+        ),
+        Product(
+            name="Heirloom Waffle Throw",
+            category="Blankets",
+            price=145,
+            fiber="Merino Wool Blend",
+            badge="Made to Order",
+            description="Textured waffle-stitch throw blanket.",
+            image_url="/static/cro4.jpeg",
+            stock=3,
+        ),
+        Product(
+            name="Meadow Granny Square Tote",
+            category="Wearables",
+            price=620,
+            fiber="Mercerized Cotton",
+            badge="New",
+            description="Handmade granny square tote bag.",
+            image_url="/static/cro5.jpeg",
+            stock=5,
+        ),
+        Product(
+            name="Mini Charm & Keychain Trio",
+            category="Accessories",
+            price=240,
+            fiber="Fine Yarn & Beaded Accents",
+            badge="Limited",
+            description="Handmade charms for bags and keys.",
+            image_url="/static/cro1.jpeg",
+            stock=8,
+        ),
     ]
     db.session.add_all(samples)
     db.session.commit()
 
 
-with app.app_context():
-    Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
-    db.create_all()
-
-    # Small SQLite upgrade for the earlier Product table used by the original app.py.
-    # db.create_all() creates tables but does not add columns to an existing table.
-    if db.engine.dialect.name == "sqlite":
-        from sqlalchemy import inspect
-        product_columns = {column["name"] for column in inspect(db.engine).get_columns("product")}
-        order_columns = {column["name"] for column in inspect(db.engine).get_columns("order")}
-        with db.engine.begin() as connection:
+def upgrade_sqlite_schema():
+    if db.engine.dialect.name != "sqlite":
+        return
+    inspector = inspect(db.engine)
+    with db.engine.begin() as connection:
+        if inspector.has_table("product"):
+            product_columns = {col["name"] for col in inspector.get_columns("product")}
             if "stock" not in product_columns:
                 connection.exec_driver_sql("ALTER TABLE product ADD COLUMN stock INTEGER NOT NULL DEFAULT 0")
             if "active" not in product_columns:
                 connection.exec_driver_sql("ALTER TABLE product ADD COLUMN active BOOLEAN NOT NULL DEFAULT 1")
-            # Upgrade older SQLite databases: the current Order model requires email,
-            # but older order tables may not contain this column. Existing orders get
-            # an empty email until customers place new orders.
+
+        if inspector.has_table("order"):
+            order_columns = {col["name"] for col in inspector.get_columns("order")}
             if "email" not in order_columns:
                 connection.exec_driver_sql(
-        'ALTER TABLE "order" ADD COLUMN email VARCHAR(160) NOT NULL DEFAULT \'\''
-    )
+                    'ALTER TABLE "order" ADD COLUMN email VARCHAR(160) NOT NULL DEFAULT \'\''
+                )
+            if "total" not in order_columns:
+                connection.exec_driver_sql(
+                    'ALTER TABLE "order" ADD COLUMN total FLOAT NOT NULL DEFAULT 0'
+                )
+            if "status" not in order_columns:
+                connection.exec_driver_sql(
+                    'ALTER TABLE "order" ADD COLUMN status VARCHAR(30) NOT NULL DEFAULT \'Pending\''
+                )
+            if "created_at" not in order_columns:
+                connection.exec_driver_sql(
+                    'ALTER TABLE "order" ADD COLUMN created_at DATETIME'
+                )
 
+
+with app.app_context():
+    Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
+    db.create_all()
+    upgrade_sqlite_schema()
     seed_products()
-    # First-run admin account. Set ADMIN_EMAIL and ADMIN_PASSWORD before deployment.
+
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@loopatelier.com").strip().lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "ChangeMe123!")
     if not AdminUser.query.filter_by(email=admin_email).first():
@@ -224,8 +274,10 @@ def create_order():
             return jsonify(error="One of the selected products is unavailable."), 400
         calculated_total += product.price * quantity
         order.items.append(OrderItem(
-            product_id=product.id, product_name=product.name,
-            quantity=quantity, unit_price=product.price
+            product_id=product.id,
+            product_name=product.name,
+            quantity=quantity,
+            unit_price=product.price,
         ))
     order.total = round(calculated_total, 2)
     db.session.add(order)
@@ -240,10 +292,11 @@ def create_commission():
     if any(not str(data.get(k, "")).strip() for k in required) or "@" not in str(data.get("email", "")):
         return jsonify(error="Please complete all required fields with a valid email."), 400
     commission = Commission(
-        name=str(data["name"]).strip(), email=str(data["email"]).strip().lower(),
+        name=str(data["name"]).strip(),
+        email=str(data["email"]).strip().lower(),
         project_type=str(data["project_type"]).strip(),
         yarn_color=str(data["yarn_color"]).strip(),
-        details=str(data["details"]).strip()
+        details=str(data["details"]).strip(),
     )
     db.session.add(commission)
     db.session.commit()
@@ -298,9 +351,13 @@ def admin_dashboard():
         "commissions": Commission.query.count(),
     }
     return render_template(
-        "admin_dashboard.html", products=products, orders=orders,
-        commissions=commissions, customers=customers, stats=stats,
-        statuses=ORDER_STATUSES
+        "admin_dashboard.html",
+        products=products,
+        orders=orders,
+        commissions=commissions,
+        customers=customers,
+        stats=stats,
+        statuses=ORDER_STATUSES,
     )
 
 
@@ -353,7 +410,6 @@ def save_product():
 def delete_product(product_id):
     verify_csrf()
     product = db.get_or_404(Product, product_id)
-    # Keep historical order items intact; they store the product name and price.
     db.session.delete(product)
     db.session.commit()
     flash("Product deleted.", "success")
@@ -380,4 +436,4 @@ def too_large(_error):
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=int(os.environ.get("PORT", 5000)), debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
