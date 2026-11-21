@@ -175,7 +175,9 @@ with app.app_context():
             # but older order tables may not contain this column. Existing orders get
             # an empty email until customers place new orders.
             if "email" not in order_columns:
-                connection.exec_driver_sql("ALTER TABLE \"order\" ADD COLUMN email VARCHAR(160) NOT NULL DEFAULT ''")
+                connection.exec_driver_sql(
+        'ALTER TABLE "order" ADD COLUMN email VARCHAR(160) NOT NULL DEFAULT \'\''
+    )
 
     seed_products()
     # First-run admin account. Set ADMIN_EMAIL and ADMIN_PASSWORD before deployment.
