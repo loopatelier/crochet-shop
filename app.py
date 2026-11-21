@@ -165,11 +165,17 @@ with app.app_context():
     if db.engine.dialect.name == "sqlite":
         from sqlalchemy import inspect
         product_columns = {column["name"] for column in inspect(db.engine).get_columns("product")}
+        order_columns = {column["name"] for column in inspect(db.engine).get_columns("order")}
         with db.engine.begin() as connection:
             if "stock" not in product_columns:
                 connection.exec_driver_sql("ALTER TABLE product ADD COLUMN stock INTEGER NOT NULL DEFAULT 0")
             if "active" not in product_columns:
                 connection.exec_driver_sql("ALTER TABLE product ADD COLUMN active BOOLEAN NOT NULL DEFAULT 1")
+            # Upgrade older SQLite databases: the current Order model requires email,
+            # but older order tables may not contain this column. Existing orders get
+            # an empty email until customers place new orders.
+            if "email" not in order_columns:
+                connection.exec_driver_sql("ALTER TABLE \"order\" ADD COLUMN email VARCHAR(160) NOT NULL DEFAULT ''")
 
     seed_products()
     # First-run admin account. Set ADMIN_EMAIL and ADMIN_PASSWORD before deployment.
