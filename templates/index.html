@@ -17,7 +17,6 @@
   </style>
 </head>
 {% set s = settings if settings is defined and settings else {} %}
-{% set qr_src = default_qr_url if default_qr_url is defined and default_qr_url else (s.qr_image_url if s.qr_image_url is defined and s.qr_image_url else '/static/upi_qr.jpeg') %}
 <body
   data-shipping-fee="{{ s.shipping_fee if s.shipping_fee is defined else 80 }}"
   data-free-shipping-above="{{ s.free_shipping_above if s.free_shipping_above is defined else 2500 }}"
@@ -87,9 +86,9 @@
       </div>
       <div class="flex flex-wrap gap-2">
         <button type="button" onclick="filterCategory('All', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#2B2420] text-white">All</button>
-        <button type="button" onclick="filterCategory('Wearables & Bags', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Wearables &amp; Bags</button>
-        <button type="button" onclick="filterCategory('Amigurumi & Plush', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Amigurumi &amp; Plush</button>
-        <button type="button" onclick="filterCategory('Floral & Keepsakes', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Floral &amp; Keepsakes</button>
+        <button type="button" onclick="filterCategory('Wearables & keepsakes', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Wearables &amp; Keepsakes</button>
+        <button type="button" onclick="filterCategory('Amigurumi & Key Charms', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Amigurumi &amp; Key Charms</button>
+        <button type="button" onclick="filterCategory('Bouquets & Bags', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Bouquets &amp; Bags</button>
         <button type="button" onclick="filterCategory('Book & Pet Accessories', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Book &amp; Pet Accessories</button>
       </div>
     </div>
@@ -204,7 +203,11 @@
             <h4 class="serif text-lg">2. Scan &amp; Pay via UPI</h4>
             <p class="text-xs text-[#7A6F66] mt-0.5">Pay exact amount: <strong id="upi-pay-amt" class="text-[#2B2420]">₹0</strong></p>
 
-            <img src="{{ qr_src }}" alt="PhonePe UPI QR Scanner" class="w-44 h-44 mx-auto my-3 rounded-xl bg-white p-2 border border-[#E6DDD1] object-contain" />
+            {% if s.qr_image_url is defined and s.qr_image_url %}
+              <img src="{{ s.qr_image_url }}" alt="UPI QR Scanner" class="w-44 h-44 mx-auto my-3 rounded-xl bg-white p-2 border border-[#E6DDD1] object-contain" />
+            {% else %}
+              <img id="dynamic-qr" src="" alt="UPI QR Code" class="w-44 h-44 mx-auto my-3 rounded-xl bg-white p-2 border border-[#E6DDD1]" />
+            {% endif %}
 
             <p class="text-xs font-semibold">UPI ID: <span id="upi-id-label" class="text-[#A65D47]">{{ s.upi_id if s.upi_id is defined else 'theloopatelier@upi' }}</span></p>
             <p class="text-[11px] text-[#7A6F66]">(<span id="upi-name-label">{{ s.upi_name if s.upi_name is defined else 'The Loop Atelier' }}</span>)</p>
@@ -361,6 +364,11 @@
       document.getElementById('step-cart').classList.add('hidden');
       document.getElementById('step-checkout').classList.remove('hidden');
       document.getElementById('upi-pay-amt').innerText = `₹${tot}`;
+      const qrImg = document.getElementById('dynamic-qr');
+      if (qrImg) {
+        const upiUri = encodeURIComponent(`upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${tot}&cu=INR`);
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${upiUri}`;
+      }
     }
 
     function backToCart() {
@@ -391,7 +399,7 @@
       });
       const data = await res.json();
       if (data.success || res.ok) {
-        document.getElementById('inv-no').innerText = data.invoice_no || `INV-${data.order_id || ''}`;
+        document.getElementById('inv-no').innerText = data.invoice_no || data.invoice_number || `INV-${data.order_id || ''}`;
         document.getElementById('inv-date').innerText = data.created_at || new Date().toLocaleString();
         document.getElementById('inv-cust').innerText = payload.customer_name;
         document.getElementById('inv-phone').innerText = payload.phone;
