@@ -248,7 +248,24 @@ def create_order():
         order.total = round(calculated_total, 2)
         db.session.add(order)
         db.session.commit()
-        return jsonify(status="ok", order_id=order.id, total=order.total), 201
+        return jsonify(
+            status="ok",
+            order_id=order.id,
+            total=order.total,
+            customer_name=order.customer_name,
+            email=order.email,
+            phone=order.phone,
+            address=order.address,
+            payment_method=order.payment_method,
+            payment_status="Pending verification",
+            created_at=order.created_at.strftime("%d %b %Y, %I:%M %p"),
+            items=[{
+                "name": item.product_name,
+                "quantity": item.quantity,
+                "unit_price": item.unit_price,
+                "line_total": round(item.quantity * item.unit_price, 2)
+            } for item in order.items]
+        ), 201
     except (TypeError, ValueError, AttributeError):
         db.session.rollback()
         return jsonify(error="Invalid product details in your basket."), 400

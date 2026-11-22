@@ -17,6 +17,15 @@
       charcoal:'#3A322D',taupe:'#6E6259'
     },fontFamily:{serif:['Fraunces','Georgia','serif'],sans:['Plus Jakarta Sans','sans-serif']}}}};
   </script>
+  <style>
+    @media print {
+      body * { visibility: hidden !important; }
+      #invoice-modal, #invoice-modal * { visibility: visible !important; }
+      #invoice-modal { position: absolute !important; inset: 0 !important; display: block !important; background: white !important; padding: 0 !important; }
+      #invoice-modal section { max-width: none !important; max-height: none !important; overflow: visible !important; box-shadow: none !important; border-radius: 0 !important; }
+      .invoice-actions, #invoice-modal button { display: none !important; }
+    }
+  </style>
 </head>
 <body class="bg-cream text-charcoal font-sans antialiased">
   <div id="toast-container" class="fixed bottom-5 right-5 z-[80] flex flex-col gap-2 pointer-events-none"></div>
@@ -171,16 +180,31 @@
     </div>
   </footer>
 
-  <<!-- Basket drawer -->
+  <!-- Customer invoice, shown after a successful order save -->
+  <div id="invoice-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-charcoal/60 p-4">
+    <section class="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-cream p-6 sm:p-8 shadow-2xl">
+      <div class="flex items-start justify-between gap-4 mb-5">
+        <div><p class="text-xs uppercase tracking-[.2em] text-terracotta font-bold">The Loop Atelier</p><h2 class="font-serif text-3xl mt-1">Your invoice</h2><p class="text-sm text-taupe mt-1">Thank you for supporting handmade.</p></div>
+        <button type="button" onclick="closeInvoice()" class="rounded-full bg-beige p-2" aria-label="Close invoice">✕</button>
+      </div>
+      <div id="invoice-content" class="space-y-4"></div>
+      <div class="flex flex-col sm:flex-row gap-3 mt-7 invoice-actions">
+        <button type="button" onclick="window.print()" class="flex-1 rounded-full bg-terracotta px-5 py-3 text-white font-semibold">Print / Save invoice</button>
+        <button type="button" onclick="closeInvoice()" class="flex-1 rounded-full bg-beige px-5 py-3 font-semibold">Continue shopping</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Basket drawer -->
   <div id="cart-modal" class="fixed inset-0 z-50 hidden">
     <div onclick="toggleCart()" class="absolute inset-0 bg-charcoal/55 backdrop-blur-sm"></div>
-    <aside class="absolute right-0 top-0 h-full w-full max-w-md bg-cream shadow-2xl flex flex-col overflow-y-auto overscroll-contain">
-      <div class="p-5 border-b border-sand flex justify-between items-center bg-beige/60 shrink-0 sticky top-0 z-10">
+    <aside class="absolute right-0 top-0 h-full w-full max-w-md bg-cream shadow-2xl flex flex-col">
+      <div class="p-5 border-b border-sand flex justify-between items-center bg-beige/60">
         <h3 class="font-serif text-xl font-semibold flex items-center gap-2"><i data-lucide="shopping-bag" class="text-terracotta"></i>Your Yarn Basket</h3>
         <button onclick="toggleCart()" class="p-2 rounded-full hover:bg-sand" aria-label="Close basket"><i data-lucide="x"></i></button>
       </div>
-      <div id="cart-items-container" class="p-5 space-y-3 shrink-0"></div>
-      <div id="cart-footer" class="hidden p-5 border-t border-sand bg-beige/50 space-y-4 shrink-0">
+      <div id="cart-items-container" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
+      <div id="cart-footer" class="hidden p-5 border-t border-sand bg-beige/50 space-y-4">
         <div class="flex justify-between text-sm"><span class="text-taupe">Subtotal</span><strong id="cart-subtotal">₹0.00</strong></div>
         <p class="text-xs text-taupe">Final delivery charges, if any, will be confirmed by the studio.</p>
         <form onsubmit="submitBasketOrder(event)" class="space-y-3">
@@ -192,8 +216,7 @@
             <p class="font-semibold text-sm">UPI payment only</p>
             <img id="checkout-qr" class="hidden mx-auto max-h-48 rounded-xl object-contain" alt="Studio UPI payment QR code">
             <p id="qr-unavailable" class="text-xs text-taupe">The studio's UPI QR code has not been uploaded yet. Please contact the studio before paying.</p>
-            <input id="payment-reference" placeholder="UPI transaction ID / UTR (after payment)" class="form-input">
-            <p class="text-xs text-taupe">Scan the QR code, pay the displayed order total, then enter your UPI transaction reference.</p>
+            <p class="text-xs text-taupe">Scan the QR code to pay. After placing your order, the studio will contact you to confirm the payment.</p>
           </div>
           <button id="checkout-submit" type="submit" class="w-full py-3.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-white font-semibold text-sm">Place UPI Order</button>
         </form>
@@ -387,7 +410,6 @@
         phone:document.getElementById('checkout-phone').value.trim(),
         address:document.getElementById('checkout-address').value.trim(),
         payment_method:'UPI',
-        payment_reference:document.getElementById('payment-reference').value.trim(),
         items:cart.map(item=>({id:item.id,qty:item.qty}))
       };
       try{
@@ -396,11 +418,40 @@
         try{result=raw?JSON.parse(raw):{};}catch(_e){throw new Error(`Order failed (HTTP ${response.status}). The server returned an unexpected response.`);}
         if(!response.ok)throw new Error(result.error||`Order failed (HTTP ${response.status}).`);
         cart=[];updateCartUI();toggleCart();event.target.reset();
-        showToast(`Order #${result.order_id} received. Total: ${money(result.total)}. We will contact you to confirm payment.`);
+        showInvoice(result);
       }catch(error){showToast(error.message||'Network error connecting to studio server.');}
       finally{button.disabled=false;button.textContent='Place UPI Order';}
     }
 
+
+    function invoiceEscape(value){
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    function showInvoice(order){
+      const rows=(order.items||[]).map(item=>`<tr class="border-b border-sand"><td class="py-3 pr-2">${invoiceEscape(item.name)}</td><td class="py-3 text-center">${Number(item.quantity)||0}</td><td class="py-3 text-right">${money(item.unit_price)}</td><td class="py-3 text-right font-semibold">${money(item.line_total)}</td></tr>`).join('');
+      document.getElementById('invoice-content').innerHTML=`
+        <div class="grid grid-cols-2 gap-3 rounded-2xl bg-beige/60 p-4 text-sm">
+          <div><p class="text-taupe text-xs">Invoice / Order</p><p class="font-bold">#${invoiceEscape(order.order_id)}</p></div>
+          <div><p class="text-taupe text-xs">Date</p><p class="font-semibold">${invoiceEscape(order.created_at)}</p></div>
+          <div><p class="text-taupe text-xs">Customer</p><p class="font-semibold">${invoiceEscape(order.customer_name)}</p></div>
+          <div><p class="text-taupe text-xs">Email</p><p class="font-semibold break-all">${invoiceEscape(order.email)}</p></div>
+          <div><p class="text-taupe text-xs">Phone</p><p class="font-semibold">${invoiceEscape(order.phone)}</p></div>
+          <div><p class="text-taupe text-xs">Payment</p><p class="font-semibold">UPI · ${invoiceEscape(order.payment_status)}</p></div>
+          <div class="col-span-2"><p class="text-taupe text-xs">Delivery address</p><p class="font-semibold">${invoiceEscape(order.address)}</p></div>
+        </div>
+        <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b-2 border-sand text-taupe text-xs"><th class="py-2 text-left">Item</th><th class="py-2">Qty</th><th class="py-2 text-right">Price</th><th class="py-2 text-right">Amount</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <div class="flex justify-between items-center border-t-2 border-charcoal pt-4"><span class="font-semibold">Total paid / payable</span><strong class="font-serif text-2xl">${money(order.total)}</strong></div>
+        <p class="rounded-xl bg-sage-light p-3 text-xs leading-relaxed text-charcoal">Your order has been received. UPI payment will be manually verified by the studio before the order is confirmed. Please keep your UPI payment confirmation.</p>
+        <p class="text-center text-xs text-taupe">Thank you for choosing The Loop Atelier ♡</p>`;
+      const modal=document.getElementById('invoice-modal');
+      modal.classList.remove('hidden');modal.classList.add('flex');
+    }
+
+    function closeInvoice(){
+      const modal=document.getElementById('invoice-modal');
+      modal.classList.add('hidden');modal.classList.remove('flex');
+    }
 
     function showToast(message){
       const container=document.getElementById('toast-container');
