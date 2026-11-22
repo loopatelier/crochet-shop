@@ -204,8 +204,17 @@
 
             <img src="{{ qr_src }}" alt="PhonePe UPI QR Scanner" class="w-44 h-44 mx-auto my-3 rounded-xl bg-white p-2 border border-[#E6DDD1] object-contain" />
 
-            <p class="text-xs font-semibold">UPI ID: <span id="upi-id-label" class="text-[#A65D47]">{{ s.upi_id if s.upi_id is defined else 'theloopatelier@upi' }}</span></p>
-            <p class="text-[11px] text-[#7A6F66]">(<span id="upi-name-label">{{ s.upi_name if s.upi_name is defined else 'The Loop Atelier' }}</span>)</p>
+            
+            <p class="text-[11px] text-[#7A6F66]">(<span id="upi-name-label">{{ s.upi_name if s.upi_name is defined else 'Ayesha' }}</span>)</p>
+
+            <a
+              id="upi-app-btn"
+              href="#"
+              class="inline-flex items-center justify-center gap-2 mt-3 px-5 py-2.5 rounded-full bg-[#A65D47] hover:bg-[#8E4C38] text-white text-xs font-medium transition"
+            >
+              📲 Open UPI Payment App
+            </a>
+            <p class="text-[11px] text-[#7A6F66] mt-1.5">Opens your UPI app on mobile • Then enter UTR below</p>
           </div>
 
           <div>
@@ -409,6 +418,15 @@
       document.getElementById('step-cart').classList.add('hidden');
       document.getElementById('step-checkout').classList.remove('hidden');
       document.getElementById('upi-pay-amt').innerText = `₹${tot}`;
+      const upiBtn = document.getElementById('upi-app-btn');
+   if (upiBtn) {
+     const params = new URLSearchParams({
+       pn: UPI_NAME,
+       am: Number(tot).toFixed(2),
+       cu: 'INR'
+     });
+     upiBtn.href = `upi://pay?${params.toString()}`;
+   }
       const qrImg = document.getElementById('dynamic-qr');
       if (qrImg) {
         const upiUri = encodeURIComponent(`upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${tot}&cu=INR`);
