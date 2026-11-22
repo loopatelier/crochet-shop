@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 
 app = Flask(__name__)
 
@@ -236,9 +236,17 @@ def create_commission():
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
-    admin_email = os.environ.get("ADMIN_EMAIL", "admin@theloopatelier.com")
+    admin_email = (
+        os.environ.get("ADMIN_USER")
+        or os.environ.get("ADMIN_EMAIL")
+        or "admin@theloopatelier.com"
+    )
     admin_password_hash = os.environ.get("ADMIN_PASSWORD_HASH")
-    admin_plain_password = os.environ.get("ADMIN_PASSWORD", "atelier123")
+    admin_plain_password = (
+        os.environ.get("ADMIN_PASS")
+        or os.environ.get("ADMIN_PASSWORD")
+        or "atelier123"
+    )
 
     if request.method == "POST":
         email = (request.form.get("email") or "").strip().lower()
@@ -248,7 +256,7 @@ def admin_login():
             if admin_password_hash
             else password == admin_plain_password
         )
-        if email == admin_email.lower() and valid_pass:
+        if email == admin_email.strip().lower() and valid_pass:
             session["admin_logged_in"] = True
             session["admin_email"] = email
             return redirect(url_for("admin_dashboard"))
