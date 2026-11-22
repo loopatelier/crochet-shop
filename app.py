@@ -61,9 +61,9 @@ class StoreSettings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     admin_email = db.Column(db.String(120), default="admin@loopatelier.com")
     password_hash = db.Column(db.String(256), nullable=False)
-    upi_id = db.Column(db.String(120), default="theloopatelier@okaxis")
-    upi_name = db.Column(db.String(120), default="The Loop Atelier")
-    qr_image_url = db.Column(db.String(300), default="")
+    upi_id = db.Column(db.String(120), default="9480178844@ibl")
+    upi_name = db.Column(db.String(120), default="Ayesha")
+    qr_image_url = db.Column(db.String(300), default="/static/upi_qr.jpeg")
     shipping_fee = db.Column(db.Float, default=70.0)
     free_shipping_above = db.Column(db.Float, default=1200.0)
 
