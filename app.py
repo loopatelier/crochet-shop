@@ -15,16 +15,39 @@ from werkzeug.utils import secure_filename
 BASE_DIR = Path(__file__).resolve().parent
 app = Flask(__name__)
 
-database_url = os.environ.get("DATABASE_URL", "sqlite:///crochet_shop.db")
+# On Render, set PERSISTENT_DATA_DIR to the mount path of your Persistent Disk
+# (for example /var/data). This keeps SQLite data and uploaded images between deploys.
+persistent_dir = os.environ.get("PERSISTENT_DATA_DIR", "").strip()
+if persistent_dir:
+    data_dir = Path(persistent_dir)
+    data_dir.mkdir(parents=True, exist_ok=True)
+else:
+    data_dir = BASE_DIR
+
+# A persistent PostgreSQL DATABASE_URL is recommended for production. If no
+# DATABASE_URL is supplied, SQLite is stored in PERSISTENT_DATA_DIR when set.
+database_url = os.environ.get("DATABASE_URL", "").strip()
+if not database_url:
+    if persistent_dir:
+        sqlite_file = data_dir / "crochet_shop.db"
+        database_url = f"sqlite:///{sqlite_file.as_posix()}"
+    else:
+        # Preserve the existing database location unless the owner explicitly
+        # configures a Render Persistent Disk.
+        database_url = "sqlite:///crochet_shop.db"
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+default_upload_folder = data_dir / "uploads" if persistent_dir else BASE_DIR / "static" / "uploads"
+upload_folder = os.environ.get("UPLOAD_FOLDER", str(default_upload_folder))
+Path(upload_folder).mkdir(parents=True, exist_ok=True)
 
 app.config.update(
     SECRET_KEY=os.environ.get("SECRET_KEY", "replace-this-with-a-long-random-secret"),
     SQLALCHEMY_DATABASE_URI=database_url,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    MAX_CONTENT_LENGTH=5 * 1024 * 1024,
-    UPLOAD_FOLDER=str(BASE_DIR / "static" / "uploads"),
+    MAX_CONTENT_LENGTH=8 * 1024 * 1024,
+    UPLOAD_FOLDER=upload_folder,
 )
 db = SQLAlchemy(app)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
