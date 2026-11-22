@@ -235,20 +235,21 @@ def upgrade_schema():
 
     with db.engine.begin() as connection:
         if inspector.has_table("order"):
-            existing = {c["name"] for c in inspector.get_columns("order")}
-            additions = {
-                "email": "VARCHAR(160) NOT NULL DEFAULT ''",
-                "phone": "VARCHAR(30) NOT NULL DEFAULT ''",
-                "address": "TEXT NOT NULL DEFAULT ''",
-                "payment_method": "VARCHAR(30) NOT NULL DEFAULT 'UPI'",
-                "payment_reference": "VARCHAR(100) NOT NULL DEFAULT ''",
-                "total": "FLOAT NOT NULL DEFAULT 0",
-                "status": "VARCHAR(30) NOT NULL DEFAULT 'Pending'",
-                "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-            }
-            for column, definition in additions.items():
-                if column not in existing:
-                    connection.exec_driver_sql(f'ALTER TABLE "order" ADD COLUMN {column} {definition}')
+    existing = {c["name"] for c in inspector.get_columns("order")}
+    additions = {
+        "email": "VARCHAR(160) NOT NULL DEFAULT ''",
+        "customer_email": "VARCHAR(160) NOT NULL DEFAULT ''",
+        "phone": "VARCHAR(30) NOT NULL DEFAULT ''",
+        "address": "TEXT NOT NULL DEFAULT ''",
+        "payment_method": "VARCHAR(30) NOT NULL DEFAULT 'UPI'",
+        "payment_reference": "VARCHAR(100) NOT NULL DEFAULT ''",
+        "total": "FLOAT NOT NULL DEFAULT 0",
+        "status": "VARCHAR(30) NOT NULL DEFAULT 'Pending'",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+    }
+    for column, definition in additions.items():
+        if column not in existing:
+            connection.exec_driver_sql(f'ALTER TABLE "order" ADD COLUMN {column} {definition}')
 
         if inspector.has_table("product"):
             existing = {c["name"] for c in inspector.get_columns("product")}
