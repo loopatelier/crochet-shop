@@ -101,31 +101,31 @@ with app.app_context():
     if Product.query.count() == 0:
         sample_products = [
             Product(
-                name="Meadow Granny Square Tote",
-                subtitle="Combed Organic Cotton",
-                category="Wearables & Keepsakes",
-                price=850,
+                name="Strawberry Bag Charm",
+                subtitle="Acrylic Yran",
+                category="Amigurumi & Key Charms",
+                price=75,
                 stock=4,
                 visible=True,
-                image_url="https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?auto=format&fit=crop&w=800&q=80",
-                description="Hand-stitched vintage floral granny squares joined with sturdy braided shoulder straps."
+                image_url="/static/cro2.jpeg",
+                description="A tiny Strawberry & Daisy charm - soft & cute."
             ),
             Product(
-                name="Pastel Lavender Lily Bouquet",
-                subtitle="Everlasting Crochet Florals",
-                category="Bouquets & Bags",
-                price=680,
+                name="Daisy keychain",
+                subtitle="Acrylic yarn",
+                category="Amigurumi & Key Charmss",
+                price=75,
                 stock=6,
                 visible=True,
-                image_url="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
-                description="Delicate soft-lilac lilies wrapped in Korean kraft paper with satin ribbon."
+                image_url="/static/cro3.jpeg",
+                description="A soft Daisy Keychain with a yellow centre."
             ),
             Product(
-                name="Sleepy Snorlax Amigurumi Plush",
-                subtitle="Velvet Chenille Yarn",
+                name="Heart Keychain",
+                subtitle="Acrylic Yarn",
                 category="Amigurumi & Key Charms",
-                price=790,
-                stock=2,
+                price=100,
+                stock=3,
                 visible=True,
                 image_url="https://images.unsplash.com/photo-1618842676088-c4d48a6a7c9d?auto=format&fit=crop&w=800&q=80",
                 description="Plush, ultra-soft handmade companion crocheted in plush velvet yarn."
