@@ -11,6 +11,7 @@
     .serif { font-family: 'Fraunces', serif; }
   </style>
 </head>
+{% set qr_src = default_qr_url if default_qr_url is defined and default_qr_url else (settings.qr_image_url if settings.qr_image_url else '/static/upi_qr.jpeg') %}
 <body class="min-h-screen pb-16">
   <!-- Top Admin Header -->
   <header class="bg-[#FDFBF8] border-b border-[#E6DDD1] px-6 py-4 flex items-center justify-between">
@@ -20,12 +21,18 @@
     </div>
     <div class="flex items-center gap-4 text-sm">
       <a href="/" target="_blank" class="text-[#A65D47] font-medium hover:underline">View customer website ↗</a>
-      <span class="text-[#7A6F66] hidden sm:inline">{{ settings.admin_email }}</span>
+      <span class="text-[#7A6F66] hidden sm:inline">{{ session.get('admin_email') or settings.admin_email }}</span>
       <a href="/admin/logout" class="px-4 py-1.5 rounded-full border border-[#E6DDD1] hover:bg-[#F6F1EA] text-xs font-medium">Logout</a>
     </div>
   </header>
 
   <main class="max-w-6xl mx-auto px-6 pt-8">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="mb-4 rounded-xl p-3 text-sm {{ 'bg-red-50 text-red-700' if category == 'error' else 'bg-emerald-50 text-emerald-800' }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
     <p class="text-xs uppercase tracking-[0.2em] text-[#7A6F66] font-semibold">Studio Overview</p>
     <h2 class="serif text-3xl mt-1">Welcome back 👋</h2>
     <p class="text-sm text-[#7A6F66] mt-1">Manage your handmade collection and customer orders.</p>
@@ -56,10 +63,10 @@
 
     <!-- Navigation Pills -->
     <div class="flex flex-wrap gap-2 mt-8 border-b border-[#E6DDD1] pb-4">
-      <button onclick="showTab('products')" id="tab-btn-products" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-[#2B2420] text-white">Products</button>
-      <button onclick="showTab('orders')" id="tab-btn-orders" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-[#FDFBF8] border border-[#E6DDD1] text-[#2B2420]">Orders ({{ orders|length }})</button>
-      <button onclick="showTab('inquiries')" id="tab-btn-inquiries" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-[#FDFBF8] border border-[#E6DDD1] text-[#2B2420]">Custom inquiries ({{ inquiries|length }})</button>
-      <button onclick="showTab('settings')" id="tab-btn-settings" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-[#FDFBF8] border border-[#E6DDD1] text-[#2B2420]">UPI QR settings</button>
+      <button type="button" onclick="showTab('products')" id="tab-btn-products" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-[#2B2420] text-white">Products</button>
+      <button type="button" onclick="showTab('orders')" id="tab-btn-orders" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-[#FDFBF8] border border-[#E6DDD1] text-[#2B2420]">Orders ({{ orders|length }})</button>
+      <button type="button" onclick="showTab('inquiries')" id="tab-btn-inquiries" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-[#FDFBF8] border border-[#E6DDD1] text-[#2B2420]">Custom inquiries ({{ inquiries|length }})</button>
+      <button type="button" onclick="showTab('settings')" id="tab-btn-settings" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-[#FDFBF8] border border-[#E6DDD1] text-[#2B2420]">UPI QR settings</button>
     </div>
 
     <!-- TAB 1: PRODUCTS -->
@@ -67,9 +74,9 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <h3 class="serif text-2xl">Product management</h3>
-          <p class="text-xs text-[#7A6F66]">Add new items or edit the details & photos customers see in your shop.</p>
+          <p class="text-xs text-[#7A6F66]">Add new items or edit the details &amp; photos customers see in your shop.</p>
         </div>
-        <button onclick="openProductModal()" class="px-5 py-2.5 rounded-full bg-[#A65D47] text-white text-sm font-medium hover:bg-[#8E4C38]">+ Add product</button>
+        <button type="button" onclick="openProductModal()" class="px-5 py-2.5 rounded-full bg-[#A65D47] text-white text-sm font-medium hover:bg-[#8E4C38]">+ Add product</button>
       </div>
 
       <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl overflow-x-auto">
@@ -88,7 +95,7 @@
             {% for p in products %}
             <tr>
               <td class="p-4 flex items-center gap-3">
-                <img src="{{ p.image_url }}" class="w-12 h-12 rounded-xl object-cover border border-[#E6DDD1]" />
+                <img src="{{ p.image_url }}" alt="{{ p.name }}" class="w-12 h-12 rounded-xl object-cover border border-[#E6DDD1]" />
                 <div>
                   <p class="font-semibold">{{ p.name }}</p>
                   <p class="text-xs text-[#7A6F66]">{{ p.subtitle }}</p>
@@ -103,22 +110,22 @@
                 </span>
               </td>
               <td class="p-4 text-right space-x-3">
-  <button type="button"
-    onclick="editProductFromBtn(this)"
-    data-id="{{ p.id }}"
-    data-name="{{ p.name }}"
-    data-subtitle="{{ p.subtitle }}"
-    data-category="{{ p.category }}"
-    data-price="{{ p.price }}"
-    data-stock="{{ p.stock }}"
-    data-visible="{{ 'true' if p.visible else 'false' }}"
-    data-image="{{ p.image_url }}"
-    data-description="{{ p.description }}"
-    class="text-[#A65D47] font-medium hover:underline">Edit</button>
-  <form action="/admin/product/delete/{{ p.id }}" method="POST" class="inline" onsubmit="return confirm('Delete this product?')">
-    <button type="submit" class="text-red-600 hover:underline">Delete</button>
-  </form>
-</td>
+                <button type="button"
+                  onclick="editProductFromBtn(this)"
+                  data-id="{{ p.id }}"
+                  data-name="{{ p.name }}"
+                  data-subtitle="{{ p.subtitle }}"
+                  data-category="{{ p.category }}"
+                  data-price="{{ p.price }}"
+                  data-stock="{{ p.stock }}"
+                  data-visible="{{ 'true' if p.visible else 'false' }}"
+                  data-image="{{ p.image_url }}"
+                  data-description="{{ p.description }}"
+                  class="text-[#A65D47] font-medium hover:underline">Edit</button>
+                <form action="/admin/product/delete/{{ p.id }}" method="POST" class="inline" onsubmit="return confirm('Delete this product?')">
+                  <button type="submit" class="text-red-600 hover:underline">Delete</button>
+                </form>
+              </td>
             </tr>
             {% endfor %}
           </tbody>
@@ -186,7 +193,7 @@
     <!-- TAB 4: UPI QR SETTINGS -->
     <section id="tab-settings" class="tab-section hidden mt-6">
       <div class="max-w-xl bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-6">
-        <h3 class="serif text-2xl mb-4">UPI Scanner & Store Settings</h3>
+        <h3 class="serif text-2xl mb-4">UPI Scanner &amp; Store Settings</h3>
         <form action="/admin/settings" method="POST" enctype="multipart/form-data" class="space-y-4 text-sm">
           <div>
             <label class="block text-xs font-semibold uppercase text-[#7A6F66] mb-1">Your UPI ID (GPay / PhonePe / Paytm)</label>
@@ -199,9 +206,7 @@
           <div>
             <label class="block text-xs font-semibold uppercase text-[#7A6F66] mb-1">Upload Your UPI QR Scanner Photo</label>
             <input type="file" name="qr_file" accept="image/*" class="w-full text-xs" />
-            {% if settings.qr_image_url %}
-              <img src="{{ settings.qr_image_url }}" class="w-36 h-36 object-contain mt-3 rounded-xl border border-[#E6DDD1] p-2 bg-white" />
-            {% endif %}
+            <img src="{{ qr_src }}" alt="PhonePe UPI QR Scanner" class="w-40 h-40 object-contain mt-3 rounded-xl border border-[#E6DDD1] p-2 bg-white" />
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -228,7 +233,7 @@
     <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl max-w-lg w-full p-6">
       <div class="flex justify-between items-center mb-4">
         <h3 id="modalTitle" class="serif text-2xl">Add Product</h3>
-        <button onclick="closeProductModal()" class="text-xl text-[#7A6F66]">&times;</button>
+        <button type="button" onclick="closeProductModal()" class="text-xl text-[#7A6F66]">&times;</button>
       </div>
       <form action="/admin/product/save" method="POST" enctype="multipart/form-data" class="space-y-3 text-sm">
         <input type="hidden" name="id" id="prod-id" />
@@ -244,10 +249,10 @@
           <div>
             <label class="block text-xs font-semibold text-[#7A6F66]">Category</label>
             <select name="category" id="prod-category" class="w-full px-3.5 py-2 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]">
-              <option>Wearables & Keepsakes</option>
-              <option>Amigurumi & Key Charms</option>
-              <option>Bouquets & Bags</option>
-              <option>Book & Pet Accessories</option>
+              <option>Wearables &amp; Bags</option>
+              <option>Amigurumi &amp; Plush</option>
+              <option>Floral &amp; Keepsakes</option>
+              <option>Book &amp; Pet Accessories</option>
             </select>
           </div>
         </div>
@@ -312,19 +317,19 @@
       document.getElementById('productModal').classList.add('flex');
     }
     function editProductFromBtn(btn) {
-  document.getElementById('modalTitle').innerText = 'Edit Product';
-  document.getElementById('prod-id').value = btn.dataset.id;
-  document.getElementById('prod-name').value = btn.dataset.name;
-  document.getElementById('prod-subtitle').value = btn.dataset.subtitle;
-  document.getElementById('prod-category').value = btn.dataset.category;
-  document.getElementById('prod-price').value = btn.dataset.price;
-  document.getElementById('prod-stock').value = btn.dataset.stock;
-  document.getElementById('prod-visible').value = btn.dataset.visible;
-  document.getElementById('prod-image-url').value = btn.dataset.image;
-  document.getElementById('prod-description').value = btn.dataset.description;
-  document.getElementById('productModal').classList.remove('hidden');
-  document.getElementById('productModal').classList.add('flex');
-}
+      document.getElementById('modalTitle').innerText = 'Edit Product';
+      document.getElementById('prod-id').value = btn.dataset.id;
+      document.getElementById('prod-name').value = btn.dataset.name;
+      document.getElementById('prod-subtitle').value = btn.dataset.subtitle;
+      document.getElementById('prod-category').value = btn.dataset.category;
+      document.getElementById('prod-price').value = btn.dataset.price;
+      document.getElementById('prod-stock').value = btn.dataset.stock;
+      document.getElementById('prod-visible').value = btn.dataset.visible;
+      document.getElementById('prod-image-url').value = btn.dataset.image;
+      document.getElementById('prod-description').value = btn.dataset.description;
+      document.getElementById('productModal').classList.remove('hidden');
+      document.getElementById('productModal').classList.add('flex');
+    }
     function closeProductModal() {
       document.getElementById('productModal').classList.add('hidden');
       document.getElementById('productModal').classList.remove('flex');
