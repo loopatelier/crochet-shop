@@ -90,8 +90,8 @@ with app.app_context():
         default_settings = StoreSettings(
             admin_email="admin@loopatelier.com",
             password_hash=generate_password_hash("atelier2026"),
-            upi_id="theloopatelier@okaxis",
-            upi_name="The Loop Atelier",
+            upi_id="9480178844@ibl",
+            upi_name="Ayesha",
             shipping_fee=70.0,
             free_shipping_above=1200.0
         )
