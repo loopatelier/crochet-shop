@@ -306,7 +306,6 @@ def update_order_status(order_id):
 @admin_required
 def update_settings():
     settings = StoreSettings.query.first()
-    settings.upi_id = request.form.get("upi_id", settings.upi_id).strip()
     settings.upi_name = request.form.get("upi_name", settings.upi_name).strip()
     settings.shipping_fee = float(request.form.get("shipping_fee", settings.shipping_fee))
     settings.free_shipping_above = float(request.form.get("free_shipping_above", settings.free_shipping_above))
