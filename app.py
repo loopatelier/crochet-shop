@@ -25,7 +25,7 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     subtitle = db.Column(db.String(200), default="100% Combed Cotton")
-    category = db.Column(db.String(80), default="Wearables & Bags")
+    category = db.Column(db.String(80), default="Wearables & Keepsakes")
     price = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, default=3)
     visible = db.Column(db.Boolean, default=True)
@@ -103,7 +103,7 @@ with app.app_context():
             Product(
                 name="Meadow Granny Square Tote",
                 subtitle="Combed Organic Cotton",
-                category="Wearables & Bags",
+                category="Wearables & Keepsakes",
                 price=850,
                 stock=4,
                 visible=True,
@@ -113,7 +113,7 @@ with app.app_context():
             Product(
                 name="Pastel Lavender Lily Bouquet",
                 subtitle="Everlasting Crochet Florals",
-                category="Floral & Keepsakes",
+                category="Bouquets & Bags",
                 price=680,
                 stock=6,
                 visible=True,
@@ -123,7 +123,7 @@ with app.app_context():
             Product(
                 name="Sleepy Snorlax Amigurumi Plush",
                 subtitle="Velvet Chenille Yarn",
-                category="Amigurumi & Plush",
+                category="Amigurumi & Key Charms",
                 price=790,
                 stock=2,
                 visible=True,
@@ -274,7 +274,7 @@ def save_product():
         prod = Product(
             name=request.form.get("name"),
             subtitle=request.form.get("subtitle", "100% Combed Cotton"),
-            category=request.form.get("category", "Wearables & Bags"),
+            category=request.form.get("category", "Wearables & Keepsakes"),
             price=float(request.form.get("price", 0)),
             stock=int(request.form.get("stock", 1)),
             visible=request.form.get("visible") == "true",
