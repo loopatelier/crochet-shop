@@ -1,4 +1,5 @@
 import os
+import re
 import json
 from datetime import datetime
 from functools import wraps
@@ -61,6 +62,7 @@ class StoreSettings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     admin_email = db.Column(db.String(120), default="admin@loopatelier.com")
     password_hash = db.Column(db.String(256), nullable=False)
+    upi_id = db.Column(db.String(120), default="ayesha@upi")
     upi_name = db.Column(db.String(120), default="Ayesha")
     qr_image_url = db.Column(db.String(300), default="/static/upi_qr.jpeg")
     shipping_fee = db.Column(db.Float, default=70.0)
@@ -89,7 +91,9 @@ with app.app_context():
         default_settings = StoreSettings(
             admin_email="admin@loopatelier.com",
             password_hash=generate_password_hash("atelier2026"),
+            upi_id="ayesha@upi",
             upi_name="Ayesha",
+            qr_image_url="/static/upi_qr.jpeg",
             shipping_fee=70.0,
             free_shipping_above=1200.0
         )
@@ -100,7 +104,7 @@ with app.app_context():
         sample_products = [
             Product(
                 name="Strawberry Bag Charm",
-                subtitle="Acrylic Yran",
+                subtitle="Acrylic Yarn",
                 category="Amigurumi & Key Charms",
                 price=75,
                 stock=4,
@@ -109,9 +113,9 @@ with app.app_context():
                 description="A tiny Strawberry & Daisy charm - soft & cute."
             ),
             Product(
-                name="Daisy keychain",
-                subtitle="Acrylic yarn",
-                category="Amigurumi & Key Charmss",
+                name="Daisy Keychain",
+                subtitle="Acrylic Yarn",
+                category="Amigurumi & Key Charms",
                 price=75,
                 stock=6,
                 visible=True,
@@ -151,55 +155,72 @@ def index():
 
 @app.route("/api/orders", methods=["POST"])
 def create_order():
-    data = request.get_json()
-    if not data or not data.get("items") or not data.get("utr"):
-        return jsonify({"error": "Missing required order details"}), 400
-        import re
+    data = request.get_json(silent=True) or {}
+    customer_name = (data.get("customer_name") or "").strip()
+    phone = (data.get("phone") or "").strip()
+    email = (data.get("email") or "").strip()
+    instagram = (data.get("instagram") or "").strip()
+    address = (data.get("address") or "").strip()
+    utr = (data.get("utr") or "").strip()
+    items = data.get("items") or []
 
     if not customer_name or not phone or not address or not utr:
         return jsonify({"success": False, "error": "Please fill in all required fields."}), 400
-        
-    if not re.fullmatch(r"[A-Za-z0-9]{8,24}", utr):
-        return jsonify({"success": False, "error": "Please enter a valid UPI UTR / transaction ID."}), 400
 
-    invoice_no = f"INV-{datetime.now().strftime('%Y%m%d')}-{Order.query.count() + 101}"
+    if not re.fullmatch(r"[A-Za-z0-9]{8,24}", utr):
+        return jsonify({"success": False, "error": "Please enter a valid UPI UTR / transaction ID (8–24 letters/numbers)."}), 400
+
+    if not isinstance(items, list) or len(items) == 0:
+        return jsonify({"success": False, "error": "Your basket is empty."}), 400
+
+    settings = StoreSettings.query.first()
+    shipping_fee = float(settings.shipping_fee) if settings else 70.0
+    free_above = float(settings.free_shipping_above) if settings else 1200.0
+
+    subtotal = sum(float(i.get("price", 0)) * int(i.get("qty", 1)) for i in items)
+    shipping = 0.0 if subtotal == 0 or subtotal >= free_above else shipping_fee
+    total = subtotal + shipping
+    now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+
     new_order = Order(
-        invoice_no=invoice_no,
-        customer_name=data["customer_name"],
-        phone=data["phone"],
-        email=data.get("email", ""),
-        instagram=data.get("instagram", ""),
-        address=data["address"],
-        items_json=json.dumps(data["items"]),
-        subtotal=float(data["subtotal"]),
-        shipping=float(data["shipping"]),
-        total=float(data["total"]),
-        utr=data["utr"].strip()
+        invoice_no=f"INV-{datetime.now().strftime('%Y%m%d%H%M%S')}-TEMP",
+        customer_name=customer_name,
+        phone=phone,
+        email=email,
+        instagram=instagram,
+        address=address,
+        items_json=json.dumps(items),
+        subtotal=subtotal,
+        shipping=shipping,
+        total=total,
+        utr=utr,
+        created_at=now_str,
     )
     db.session.add(new_order)
+    db.session.flush()
+    new_order.invoice_no = f"INV-{datetime.now().strftime('%Y%m%d')}-{new_order.id + 100}"
 
-    # Deduct stock automatically
-    for item in data["items"]:
-        prod = Product.query.get(item["id"])
+    for item in items:
+        prod = Product.query.get(item.get("id"))
         if prod and prod.stock > 0:
-            prod.stock = max(0, prod.stock - int(item["qty"]))
+            prod.stock = max(0, prod.stock - int(item.get("qty", 1)))
 
     db.session.commit()
     return jsonify({
         "success": True,
-        "invoice_no": invoice_no,
+        "invoice_no": new_order.invoice_no,
         "created_at": new_order.created_at
     })
 
 @app.route("/api/custom-inquiry", methods=["POST"])
 def create_custom_inquiry():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     inquiry = CustomInquiry(
-        name=data.get("name", ""),
-        contact=data.get("contact", ""),
-        item_type=data.get("item_type", ""),
-        colors=data.get("colors", ""),
-        notes=data.get("notes", "")
+        name=(data.get("name") or "").strip(),
+        contact=(data.get("contact") or "").strip(),
+        item_type=(data.get("item_type") or "").strip(),
+        colors=(data.get("colors") or "").strip(),
+        notes=(data.get("notes") or "").strip()
     )
     db.session.add(inquiry)
     db.session.commit()
@@ -215,7 +236,7 @@ def admin_login():
         email = request.form.get("email", "").strip()
         password = request.form.get("password", "")
         settings = StoreSettings.query.first()
-        if email == settings.admin_email and check_password_hash(settings.password_hash, password):
+        if settings and email == settings.admin_email and check_password_hash(settings.password_hash, password):
             session["is_admin"] = True
             return redirect(url_for("admin_dashboard"))
         error = "Invalid studio credentials."
@@ -233,16 +254,20 @@ def admin_dashboard():
     orders_raw = Order.query.order_by(Order.id.desc()).all()
     orders = []
     for o in orders_raw:
+        try:
+            parsed_items = json.loads(o.items_json or "[]")
+        except Exception:
+            parsed_items = []
         orders.append({
             "obj": o,
-            "items": json.loads(o.items_json)
+            "items": parsed_items
         })
     inquiries = CustomInquiry.query.order_by(CustomInquiry.id.desc()).all()
     settings = StoreSettings.query.first()
 
     active_products = sum(1 for p in products if p.visible)
     pending_orders = sum(1 for o in orders_raw if o.status == "Pending Verification")
-    unique_customers = len(set(o.phone.strip() for o in orders_raw))
+    unique_customers = len(set(o.phone.strip() for o in orders_raw if o.phone))
     total_revenue = sum(o.total for o in orders_raw if o.status != "Cancelled")
 
     return render_template(
@@ -311,6 +336,9 @@ def update_order_status(order_id):
 @admin_required
 def update_settings():
     settings = StoreSettings.query.first()
+    upi_id_val = (request.form.get("upi_id") or "").strip()
+    if upi_id_val:
+        settings.upi_id = upi_id_val
     settings.upi_name = request.form.get("upi_name", settings.upi_name).strip()
     settings.shipping_fee = float(request.form.get("shipping_fee", settings.shipping_fee))
     settings.free_shipping_above = float(request.form.get("free_shipping_above", settings.free_shipping_above))
