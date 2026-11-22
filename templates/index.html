@@ -20,8 +20,8 @@
 <body
   data-shipping-fee="{{ s.shipping_fee if s.shipping_fee is defined else 80 }}"
   data-free-shipping-above="{{ s.free_shipping_above if s.free_shipping_above is defined else 2500 }}"
-  data-upi-id="{{ s.upi_id if s.upi_id is defined else 'theloopatelier@upi' }}"
-  data-upi-name="{{ s.upi_name if s.upi_name is defined else 'The Loop Atelier' }}"
+  data-upi-id="{{ s.upi_id if s.upi_id is defined else '9480178844@ibl' }}"
+  data-upi-name="{{ s.upi_name if s.upi_name is defined else 'Ayesha' }}"
 >
   <!-- Navbar (Customer Only — No Admin Link) -->
   <header class="sticky top-0 z-40 bg-[#F6F1EA]/90 backdrop-blur-md border-b border-[#E6DDD1]">
@@ -204,7 +204,7 @@
             <p class="text-xs text-[#7A6F66] mt-0.5">Pay exact amount: <strong id="upi-pay-amt" class="text-[#2B2420]">₹0</strong></p>
 
             {% if s.qr_image_url is defined and s.qr_image_url %}
-              <img src="{{ s.qr_image_url }}" alt="UPI QR Scanner" class="w-44 h-44 mx-auto my-3 rounded-xl bg-white p-2 border border-[#E6DDD1] object-contain" />
+              <img src="static/upi_qr.jpeg" alt="UPI QR Scanner" class="w-44 h-44 mx-auto my-3 rounded-xl bg-white p-2 border border-[#E6DDD1] object-contain" />
             {% else %}
               <img id="dynamic-qr" src="" alt="UPI QR Code" class="w-44 h-44 mx-auto my-3 rounded-xl bg-white p-2 border border-[#E6DDD1]" />
             {% endif %}
