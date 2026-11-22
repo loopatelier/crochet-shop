@@ -6,17 +6,18 @@ from pathlib import Path
 
 from flask import (
     Flask, abort, flash, jsonify, redirect, render_template,
-    request, session, url_for
+    request, send_from_directory, session, url_for
 )
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import inspect
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
 BASE_DIR = Path(__file__).resolve().parent
 app = Flask(__name__)
 
-# On Render, set PERSISTENT_DATA_DIR to the mount path of your Persistent Disk
-# (for example /var/data). This keeps SQLite data and uploaded images between deploys.
+# On Render, set PERSISTENT_DATA_DIR to your Persistent Disk mount path (e.g., /var/data)
+# or set DATABASE_URL to a persistent PostgreSQL database.
 persistent_dir = os.environ.get("PERSISTENT_DATA_DIR", "").strip()
 if persistent_dir:
     data_dir = Path(persistent_dir)
@@ -24,16 +25,12 @@ if persistent_dir:
 else:
     data_dir = BASE_DIR
 
-# A persistent PostgreSQL DATABASE_URL is recommended for production. If no
-# DATABASE_URL is supplied, SQLite is stored in PERSISTENT_DATA_DIR when set.
 database_url = os.environ.get("DATABASE_URL", "").strip()
 if not database_url:
     if persistent_dir:
         sqlite_file = data_dir / "crochet_shop.db"
         database_url = f"sqlite:///{sqlite_file.as_posix()}"
     else:
-        # Preserve the existing database location unless the owner explicitly
-        # configures a Render Persistent Disk.
         database_url = "sqlite:///crochet_shop.db"
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
@@ -68,10 +65,16 @@ class Product(db.Model):
 
     def to_dict(self):
         return {
-            "id": self.id, "name": self.name, "category": self.category,
-            "price": self.price, "fiber": self.fiber, "badge": self.badge,
-            "description": self.description, "image_url": self.image_url,
-            "stock": self.stock, "active": self.active
+            "id": self.id,
+            "name": self.name,
+            "category": self.category,
+            "price": self.price,
+            "fiber": self.fiber,
+            "badge": self.badge,
+            "description": self.description,
+            "image_url": self.image_url,
+            "stock": self.stock,
+            "active": self.active,
         }
 
 
@@ -147,54 +150,88 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def save_product_image(file):
+def save_uploaded_file(file, prefix="prod"):
     if not file or not file.filename:
         return None
     if not allowed_file(file.filename):
         raise ValueError("Upload a PNG, JPG, JPEG, WEBP or GIF image.")
-    filename = secure_filename(file.filename)
-    unique_name = f"{secrets.token_hex(8)}_{filename}"
+    safe_name = secure_filename(file.filename)
+    unique_name = f"{prefix}_{secrets.token_hex(8)}_{safe_name}"
     Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
     file.save(Path(app.config["UPLOAD_FOLDER"]) / unique_name)
-    return f"/static/uploads/{unique_name}"
+    return url_for("uploaded_file", filename=unique_name)
+
+
+@app.get("/uploads/<path:filename>")
+def uploaded_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 
 def seed_products():
     if Product.query.first():
         return
     samples = [
-        Product(name="Strawberry Bag Charm", category="Keychains", price=100,
-                fiber="Soft Cotton & Milk Yarn", badge="Bestseller",
-                description="Handcrafted crochet strawberry bag charm.",
-                image_url="/static/cro2.jpeg", stock=10),
-        Product(name="Daisy Keychain", category="Keychains", price=75,
-                fiber="Velvet Chenille", badge="Ready to Ship",
-                description="Beautiful handmade crochet daisy keychain.",
-                image_url="/static/cro3.jpeg", stock=12),
-        Product(name="Heirloom Waffle Throw", category="Blankets", price=145,
-                fiber="Merino Wool Blend", badge="Made to Order",
-                description="Textured waffle-stitch throw blanket.",
-                image_url="/static/cro4.jpeg", stock=3),
-        Product(name="Meadow Granny Square Tote", category="Wearables", price=620,
-                fiber="Mercerized Cotton", badge="New",
-                description="Handmade granny square tote bag.",
-                image_url="/static/cro5.jpeg", stock=5),
-        Product(name="Mini Charm & Keychain Trio", category="Accessories", price=240,
-                fiber="Fine Yarn & Beaded Accents", badge="Limited",
-                description="Handmade charms for bags and keys.",
-                image_url="/static/cro6.jpeg", stock=8),
+        Product(
+            name="Strawberry Bag Charm",
+            category="Keychains",
+            price=100,
+            fiber="Soft Cotton & Milk Yarn",
+            badge="Bestseller",
+            description="Handcrafted crochet strawberry bag charm.",
+            image_url="/static/cro2.jpeg",
+            stock=10,
+        ),
+        Product(
+            name="Daisy Keychain",
+            category="Keychains",
+            price=75,
+            fiber="Velvet Chenille",
+            badge="Ready to Ship",
+            description="Beautiful handmade crochet daisy keychain.",
+            image_url="/static/cro3.jpeg",
+            stock=12,
+        ),
+        Product(
+            name="Heirloom Waffle Throw",
+            category="Blankets",
+            price=145,
+            fiber="Merino Wool Blend",
+            badge="Made to Order",
+            description="Textured waffle-stitch throw blanket.",
+            image_url="/static/cro4.jpeg",
+            stock=3,
+        ),
+        Product(
+            name="Meadow Granny Square Tote",
+            category="Wearables",
+            price=620,
+            fiber="Mercerized Cotton",
+            badge="New",
+            description="Handmade granny square tote bag.",
+            image_url="/static/cro5.jpeg",
+            stock=5,
+        ),
+        Product(
+            name="Mini Charm & Keychain Trio",
+            category="Accessories",
+            price=240,
+            fiber="Fine Yarn & Beaded Accents",
+            badge="Limited",
+            description="Handmade charms for bags and keys.",
+            image_url="/static/cro1.jpeg",
+            stock=8,
+        ),
     ]
     db.session.add_all(samples)
     db.session.commit()
 
 
-with app.app_context():
-    Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
-    db.create_all()
-
-    # Add columns to existing databases (db.create_all() does not alter old tables).
-    from sqlalchemy import inspect
+def upgrade_schema():
     inspector = inspect(db.engine)
+    is_postgres = db.engine.dialect.name == "postgresql"
+    bool_default = "FALSE" if is_postgres else "0"
+    true_default = "TRUE" if is_postgres else "1"
+
     with db.engine.begin() as connection:
         if inspector.has_table("order"):
             existing = {c["name"] for c in inspector.get_columns("order")}
@@ -206,19 +243,26 @@ with app.app_context():
                 "payment_reference": "VARCHAR(100) NOT NULL DEFAULT ''",
                 "total": "FLOAT NOT NULL DEFAULT 0",
                 "status": "VARCHAR(30) NOT NULL DEFAULT 'Pending'",
-                "created_at": "TIMESTAMP NULL",
+                "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
             }
             for column, definition in additions.items():
                 if column not in existing:
                     connection.exec_driver_sql(f'ALTER TABLE "order" ADD COLUMN {column} {definition}')
+
         if inspector.has_table("product"):
             existing = {c["name"] for c in inspector.get_columns("product")}
-            for column, definition in {"stock": "INTEGER NOT NULL DEFAULT 0", "active": "BOOLEAN NOT NULL DEFAULT TRUE"}.items():
-                if column not in existing:
-                    connection.exec_driver_sql(f'ALTER TABLE product ADD COLUMN {column} {definition}')
+            if "stock" not in existing:
+                connection.exec_driver_sql("ALTER TABLE product ADD COLUMN stock INTEGER NOT NULL DEFAULT 0")
+            if "active" not in existing:
+                connection.exec_driver_sql(f"ALTER TABLE product ADD COLUMN active BOOLEAN NOT NULL DEFAULT {true_default}")
 
+
+with app.app_context():
+    Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
+    db.create_all()
+    upgrade_schema()
     seed_products()
-    # First-run admin account. Set ADMIN_EMAIL and ADMIN_PASSWORD before deployment.
+
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@loopatelier.com").strip().lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "ChangeMe123!")
     if not AdminUser.query.filter_by(email=admin_email).first():
@@ -250,27 +294,47 @@ def create_order():
     payment_method = str(data.get("payment_method", "UPI")).strip().upper()
     payment_reference = str(data.get("payment_reference", "")).strip()
     items = data.get("items", [])
+
     if not name or "@" not in email or not phone or not address or not isinstance(items, list) or not items:
         return jsonify(error="Please enter your name, valid email, phone, delivery address and products."), 400
     if payment_method != "UPI":
         return jsonify(error="Only UPI payment is accepted."), 400
+
     try:
-        order = Order(customer_name=name, email=email, phone=phone, address=address,
-                      payment_method="UPI", payment_reference=payment_reference, total=0)
-        calculated_total = 0
+        order = Order(
+            customer_name=name,
+            email=email,
+            phone=phone,
+            address=address,
+            payment_method="UPI",
+            payment_reference=payment_reference,
+            total=0,
+            status="Pending",
+            created_at=datetime.utcnow(),
+        )
+        calculated_total = 0.0
         for row in items:
-            product_id, quantity = int(row.get("id")), int(row.get("qty"))
+            product_id = int(row.get("id"))
+            quantity = int(row.get("qty"))
             product = db.session.get(Product, product_id)
             if not product or not product.active or quantity < 1:
                 return jsonify(error="One of the selected products is unavailable."), 400
             if product.stock > 0 and quantity > product.stock:
                 return jsonify(error=f"Only {product.stock} units of {product.name} are available."), 400
-            calculated_total += product.price * quantity
-            order.items.append(OrderItem(product_id=product.id, product_name=product.name,
-                                         quantity=quantity, unit_price=product.price))
+            line_total = round(float(product.price) * quantity, 2)
+            calculated_total += line_total
+            order.items.append(OrderItem(
+                product_id=product.id,
+                product_name=product.name,
+                quantity=quantity,
+                unit_price=float(product.price),
+            ))
+
         order.total = round(calculated_total, 2)
         db.session.add(order)
         db.session.commit()
+
+        created_str = order.created_at.strftime("%d %b %Y, %I:%M %p") if order.created_at else ""
         return jsonify(
             status="ok",
             order_id=order.id,
@@ -281,12 +345,12 @@ def create_order():
             address=order.address,
             payment_method=order.payment_method,
             payment_status="Pending verification",
-            created_at=order.created_at.strftime("%d %b %Y, %I:%M %p"),
+            created_at=created_str,
             items=[{
                 "name": item.product_name,
                 "quantity": item.quantity,
                 "unit_price": item.unit_price,
-                "line_total": round(item.quantity * item.unit_price, 2)
+                "line_total": round(item.quantity * item.unit_price, 2),
             } for item in order.items]
         ), 201
     except (TypeError, ValueError, AttributeError):
@@ -311,10 +375,12 @@ def create_commission():
     if any(not str(data.get(k, "")).strip() for k in required) or "@" not in str(data.get("email", "")):
         return jsonify(error="Please complete all required fields with a valid email."), 400
     commission = Commission(
-        name=str(data["name"]).strip(), email=str(data["email"]).strip().lower(),
+        name=str(data["name"]).strip(),
+        email=str(data["email"]).strip().lower(),
         project_type=str(data["project_type"]).strip(),
         yarn_color=str(data["yarn_color"]).strip(),
-        details=str(data["details"]).strip()
+        details=str(data["details"]).strip(),
+        created_at=datetime.utcnow(),
     )
     db.session.add(commission)
     db.session.commit()
@@ -353,8 +419,8 @@ def admin_logout():
 @admin_required
 def admin_dashboard():
     products = Product.query.order_by(Product.id.desc()).all()
-    orders = Order.query.order_by(Order.created_at.desc()).all()
-    commissions = Commission.query.order_by(Commission.created_at.desc()).all()
+    orders = Order.query.order_by(Order.id.desc()).all()
+    commissions = Commission.query.order_by(Commission.id.desc()).all()
     qr_setting = db.session.get(SiteSetting, 1)
     customers = db.session.query(Order.email, Order.customer_name, Order.phone).distinct().all()
     revenue = db.session.query(db.func.coalesce(db.func.sum(Order.total), 0)).filter(
@@ -370,9 +436,14 @@ def admin_dashboard():
         "commissions": Commission.query.count(),
     }
     return render_template(
-        "admin_dashboard.html", products=products, orders=orders,
-        commissions=commissions, customers=customers, stats=stats,
-        statuses=ORDER_STATUSES, qr_setting=qr_setting
+        "admin_dashboard.html",
+        products=products,
+        orders=orders,
+        commissions=commissions,
+        customers=customers,
+        stats=stats,
+        statuses=ORDER_STATUSES,
+        qr_setting=qr_setting,
     )
 
 
@@ -384,14 +455,13 @@ def upload_payment_qr():
     if not uploaded or not uploaded.filename:
         flash("Choose a UPI QR image to upload.", "error")
         return redirect(url_for("admin_dashboard") + "#payment")
-    if not allowed_file(uploaded.filename):
-        flash("Upload a PNG, JPG, JPEG, WEBP or GIF image.", "error")
+    try:
+        image_url = save_uploaded_file(uploaded, prefix="upi_qr")
+    except ValueError as exc:
+        flash(str(exc), "error")
         return redirect(url_for("admin_dashboard") + "#payment")
-    filename = f"upi_qr_{secrets.token_hex(8)}_{secure_filename(uploaded.filename)}"
-    Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
-    uploaded.save(Path(app.config["UPLOAD_FOLDER"]) / filename)
     setting = db.session.get(SiteSetting, 1) or SiteSetting(id=1)
-    setting.upi_qr_image = f"/static/uploads/{filename}"
+    setting.upi_qr_image = image_url
     db.session.add(setting)
     db.session.commit()
     flash("UPI QR code uploaded successfully.", "success")
@@ -419,7 +489,7 @@ def save_product():
         flash("Please complete the product fields correctly.", "error")
         return redirect(url_for("admin_dashboard") + "#products")
     try:
-        new_image = save_product_image(request.files.get("image"))
+        new_image = save_uploaded_file(request.files.get("image"), prefix="prod")
     except ValueError as exc:
         flash(str(exc), "error")
         return redirect(url_for("admin_dashboard") + "#products")
@@ -447,7 +517,6 @@ def save_product():
 def delete_product(product_id):
     verify_csrf()
     product = db.get_or_404(Product, product_id)
-    # Keep historical order items intact; they store the product name and price.
     db.session.delete(product)
     db.session.commit()
     flash("Product deleted.", "success")
@@ -470,7 +539,7 @@ def update_order_status(order_id):
 
 @app.errorhandler(413)
 def too_large(_error):
-    return "Image is too large. Maximum upload size is 5 MB.", 413
+    return "Image is too large. Maximum upload size is 8 MB.", 413
 
 
 if __name__ == "__main__":
