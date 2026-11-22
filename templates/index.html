@@ -202,21 +202,40 @@
             <h4 class="serif text-lg">2. Scan &amp; Pay via UPI</h4>
             <p class="text-xs text-[#7A6F66] mt-0.5">Pay exact amount: <strong id="upi-pay-amt" class="text-[#2B2420]">₹0</strong></p>
 
-            {% if s.qr_image_url is defined and s.qr_image_url %}
-              <img src="static/upi_qr.jpeg" alt="UPI QR Scanner" class="w-44 h-44 mx-auto my-3 rounded-xl bg-white p-2 border border-[#E6DDD1] object-contain" />
-            {% else %}
-              <img id="dynamic-qr" src="" alt="UPI QR Code" class="w-44 h-44 mx-auto my-3 rounded-xl bg-white p-2 border border-[#E6DDD1]" />
-            {% endif %}
+            <img src="{{ qr_src }}" alt="PhonePe UPI QR Scanner" class="w-44 h-44 mx-auto my-3 rounded-xl bg-white p-2 border border-[#E6DDD1] object-contain" />
 
-            <p class="text-[11px] text-[#7A6F66]">(<span id="upi-name-label">{{ s.upi_name if s.upi_name is defined else 'Ayesha' }}</span>)</p>
+            <p class="text-xs font-semibold">UPI ID: <span id="upi-id-label" class="text-[#A65D47]">{{ s.upi_id if s.upi_id is defined else 'theloopatelier@upi' }}</span></p>
+            <p class="text-[11px] text-[#7A6F66]">(<span id="upi-name-label">{{ s.upi_name if s.upi_name is defined else 'The Loop Atelier' }}</span>)</p>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-[#7A6F66] mb-1">3. Enter 12-Digit UPI UTR / Transaction ID *</label>
-            <input type="text" id="ord-utr" required placeholder="e.g. 432819045612" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+            <label class="block text-xs font-semibold text-[#7A6F66] mb-1">3. Enter UPI UTR / Transaction ID *</label>
+            <input
+              type="text"
+              id="ord-utr"
+              required
+              minlength="8"
+              maxlength="24"
+              pattern="[A-Za-z0-9]{8,24}"
+              placeholder="e.g. 432819045612"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]"
+            />
+            <p id="utr-hint" class="text-[11px] text-[#7A6F66] mt-1">Enter the transaction/UTR ID from your UPI app after paying.</p>
           </div>
 
-          <button type="submit" class="w-full py-3.5 rounded-full bg-[#2B2420] hover:bg-[#A65D47] text-white font-medium transition">
+          <label class="flex items-start gap-2.5 text-xs text-[#2B2420] bg-[#F6F1EA] border border-[#E6DDD1] rounded-xl p-3 cursor-pointer">
+            <input type="checkbox" id="ord-paid-confirm" class="mt-0.5 rounded border-[#D4C7B8] text-[#A65D47]" />
+            <span>I have completed the UPI payment for the exact order amount shown above and entered my transaction/UTR ID.</span>
+          </label>
+
+          <p id="payment-gate-error" class="hidden text-xs text-red-600 font-medium"></p>
+
+          <button
+            type="submit"
+            id="confirm-order-btn"
+            disabled
+            class="w-full py-3.5 rounded-full bg-[#2B2420] hover:bg-[#A65D47] text-white font-medium transition opacity-50 cursor-not-allowed"
+          >
             Confirm Payment &amp; Generate Invoice
           </button>
         </form>
@@ -266,6 +285,35 @@
     const FREE_SHIPPING_ABOVE = Number(document.body.dataset.freeShippingAbove || 2500);
     const UPI_NAME = document.body.dataset.upiName || 'Ayesha';
     let basket = [];
+
+    const utrInput = document.getElementById('ord-utr');
+    const paidCheckbox = document.getElementById('ord-paid-confirm');
+    const confirmOrderBtn = document.getElementById('confirm-order-btn');
+    const paymentGateError = document.getElementById('payment-gate-error');
+
+    function isValidUtr(value) {
+      return /^[A-Za-z0-9]{8,24}$/.test((value || '').trim());
+    }
+
+    function syncPaymentGate() {
+      const hasValidUtr = isValidUtr(utrInput ? utrInput.value : '');
+      const isChecked = Boolean(paidCheckbox && paidCheckbox.checked);
+      const canProceed = hasValidUtr && isChecked;
+
+      if (confirmOrderBtn) {
+        confirmOrderBtn.disabled = !canProceed;
+        confirmOrderBtn.classList.toggle('opacity-50', !canProceed);
+        confirmOrderBtn.classList.toggle('cursor-not-allowed', !canProceed);
+      }
+      if (paymentGateError && canProceed) {
+        paymentGateError.classList.add('hidden');
+        paymentGateError.textContent = '';
+      }
+      return canProceed;
+    }
+
+    if (utrInput) utrInput.addEventListener('input', syncPaymentGate);
+    if (paidCheckbox) paidCheckbox.addEventListener('change', syncPaymentGate);
 
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.add-to-basket-btn').forEach(btn => {
@@ -375,6 +423,15 @@
 
     async function placeOrder(e) {
       e.preventDefault();
+      const utrValue = document.getElementById('ord-utr').value.trim();
+      const paidConfirmed = document.getElementById('ord-paid-confirm').checked;
+
+      if (!paidConfirmed || !isValidUtr(utrValue)) {
+        paymentGateError.textContent = 'Please complete the UPI payment, enter a valid transaction/UTR ID (8–24 letters/numbers), and tick the confirmation box first.';
+        paymentGateError.classList.remove('hidden');
+        syncPaymentGate();
+        return;
+      }
       const { sub, ship, tot } = renderBasket();
       const payload = {
         customer_name: document.getElementById('ord-name').value,
@@ -413,6 +470,8 @@
         document.getElementById('inv-tot').innerText = `₹${tot}`;
 
         basket = [];
+        if (paidCheckbox) paidCheckbox.checked = false;
+        syncPaymentGate();
         renderBasket();
         backToCart();
         toggleBasket(false);

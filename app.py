@@ -154,6 +154,13 @@ def create_order():
     data = request.get_json()
     if not data or not data.get("items") or not data.get("utr"):
         return jsonify({"error": "Missing required order details"}), 400
+        import re
+
+    if not customer_name or not phone or not address or not utr:
+        return jsonify({"success": False, "error": "Please fill in all required fields."}), 400
+        
+    if not re.fullmatch(r"[A-Za-z0-9]{8,24}", utr):
+        return jsonify({"success": False, "error": "Please enter a valid UPI UTR / transaction ID."}), 400
 
     invoice_no = f"INV-{datetime.now().strftime('%Y%m%d')}-{Order.query.count() + 101}"
     new_order = Order(
