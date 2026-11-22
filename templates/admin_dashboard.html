@@ -1,304 +1,334 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard | The Loop Atelier</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>body{font-family:'Plus Jakarta Sans',sans-serif}.serif{font-family:'Fraunces',serif}html{scroll-behavior:smooth}</style>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { background: #F6F1EA; color: #2B2420; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .serif { font-family: 'Fraunces', serif; }
+  </style>
 </head>
-<body class="bg-[#FAF6F0] text-[#3A322D]">
-  {% set s = stats or {'products': (products|length if products else 0), 'active_products': (products|length if products else 0), 'orders': (orders|length if orders else 0), 'pending': 0, 'customers': (customers|length if customers else 0), 'revenue': 0.0} %}
-  {% set order_statuses = statuses or ['Pending', 'Confirmed', 'In Progress', 'Shipped', 'Delivered', 'Cancelled'] %}
-
-  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-[#E4D8C8]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
-      <div>
-        <p class="serif text-xl sm:text-2xl font-semibold">The Loop Atelier</p>
-        <p class="text-xs text-[#6E6259]">Admin studio</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="hidden sm:block text-xs text-[#6E6259]">{{ session.get('admin_email', 'Admin') }}</span>
-        <form method="post" action="{{ url_for('admin_logout') }}">
-          {% if csrf_token is defined %}
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-          {% endif %}
-          <button type="submit" class="rounded-full border border-[#E4D8C8] px-4 py-2 text-sm hover:bg-[#EFE7DC]">Logout</button>
-        </form>
-      </div>
+<body class="min-h-screen pb-16">
+  <!-- Top Admin Header -->
+  <header class="bg-[#FDFBF8] border-b border-[#E6DDD1] px-6 py-4 flex items-center justify-between">
+    <div>
+      <h1 class="serif text-xl font-semibold">The Loop Atelier</h1>
+      <p class="text-xs text-[#7A6F66]">Admin Studio • @the_loop.atelier</p>
+    </div>
+    <div class="flex items-center gap-4 text-sm">
+      <a href="/" target="_blank" class="text-[#A65D47] font-medium hover:underline">View customer website ↗</a>
+      <span class="text-[#7A6F66] hidden sm:inline">{{ settings.admin_email }}</span>
+      <a href="/admin/logout" class="px-4 py-1.5 rounded-full border border-[#E6DDD1] hover:bg-[#F6F1EA] text-xs font-medium">Logout</a>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% for category, message in messages %}
-        <div class="mb-4 rounded-xl p-3 text-sm {{ 'bg-red-50 text-red-700' if category == 'error' else 'bg-green-50 text-green-700' }}">{{ message }}</div>
-      {% endfor %}
-    {% endwith %}
+  <main class="max-w-6xl mx-auto px-6 pt-8">
+    <p class="text-xs uppercase tracking-[0.2em] text-[#7A6F66] font-semibold">Studio Overview</p>
+    <h2 class="serif text-3xl mt-1">Welcome back 👋</h2>
+    <p class="text-sm text-[#7A6F66] mt-1">Manage your handmade collection and customer orders.</p>
 
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7">
-      <div>
-        <p class="text-xs uppercase tracking-[.2em] text-[#7C9082] font-bold">Studio overview</p>
-        <h1 class="serif text-3xl sm:text-4xl font-semibold mt-1">Welcome back 👋</h1>
-        <p class="text-sm text-[#6E6259] mt-2">Manage your handmade collection and customer orders.</p>
+    <!-- 4 KPI Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+      <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-5">
+        <p class="text-xs text-[#7A6F66]">Products</p>
+        <p class="serif text-3xl mt-1">{{ products|length }}</p>
+        <p class="text-xs text-[#7A6F66] mt-1">{{ active_products }} active</p>
       </div>
-      <a href="{{ url_for('index') }}" target="_blank" class="text-sm font-semibold text-[#C86D51] hover:underline">View customer website ↗</a>
+      <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-5">
+        <p class="text-xs text-[#7A6F66]">Orders</p>
+        <p class="serif text-3xl mt-1">{{ orders|length }}</p>
+        <p class="text-xs text-[#A65D47] mt-1">{{ pending_orders }} pending</p>
+      </div>
+      <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-5">
+        <p class="text-xs text-[#7A6F66]">Customers</p>
+        <p class="serif text-3xl mt-1">{{ unique_customers }}</p>
+        <p class="text-xs text-[#7A6F66] mt-1">Unique customers</p>
+      </div>
+      <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-5">
+        <p class="text-xs text-[#7A6F66]">Revenue</p>
+        <p class="serif text-3xl mt-1">₹{{ "%.2f"|format(total_revenue) }}</p>
+        <p class="text-xs text-[#7A6F66] mt-1">Excludes cancelled orders</p>
+      </div>
     </div>
 
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-      {% for label, value, note in [
-        ('Products', s.products, (s.active_products|string) ~ ' active'),
-        ('Orders', s.orders, (s.pending|string) ~ ' pending'),
-        ('Customers', s.customers, 'Unique customers'),
-        ('Revenue', '₹' ~ '%.2f'|format(s.revenue|float), 'Excludes cancelled orders')
-      ] %}
-        <div class="bg-white border border-[#E4D8C8] rounded-2xl p-4 sm:p-5">
-          <p class="text-xs text-[#6E6259]">{{ label }}</p>
-          <p class="serif text-2xl sm:text-3xl font-semibold mt-2">{{ value }}</p>
-          <p class="text-xs text-[#7C9082] mt-1">{{ note }}</p>
-        </div>
-      {% endfor %}
-    </section>
+    <!-- Navigation Pills -->
+    <div class="flex flex-wrap gap-2 mt-8 border-b border-[#E6DDD1] pb-4">
+      <button onclick="showTab('products')" id="tab-btn-products" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-[#2B2420] text-white">Products</button>
+      <button onclick="showTab('orders')" id="tab-btn-orders" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-[#FDFBF8] border border-[#E6DDD1] text-[#2B2420]">Orders ({{ orders|length }})</button>
+      <button onclick="showTab('inquiries')" id="tab-btn-inquiries" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-[#FDFBF8] border border-[#E6DDD1] text-[#2B2420]">Custom inquiries ({{ inquiries|length }})</button>
+      <button onclick="showTab('settings')" id="tab-btn-settings" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-[#FDFBF8] border border-[#E6DDD1] text-[#2B2420]">UPI QR settings</button>
+    </div>
 
-    <nav class="flex flex-wrap gap-2 mb-8 text-sm">
-      <a href="#products" class="rounded-full bg-[#3A322D] text-white px-4 py-2">Products</a>
-      <a href="#orders" class="rounded-full bg-white border border-[#E4D8C8] px-4 py-2">Orders</a>
-      <a href="#customers" class="rounded-full bg-white border border-[#E4D8C8] px-4 py-2">Customers</a>
-      <a href="#commissions" class="rounded-full bg-white border border-[#E4D8C8] px-4 py-2">Custom inquiries</a>
-      <a href="#payment" class="rounded-full bg-white border border-[#E4D8C8] px-4 py-2">UPI QR settings</a>
-    </nav>
-
-    <section id="products" class="scroll-mt-24 mb-10">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+    <!-- TAB 1: PRODUCTS -->
+    <section id="tab-products" class="tab-section mt-6">
+      <div class="flex items-center justify-between mb-4">
         <div>
-          <h2 class="serif text-2xl font-semibold">Product management</h2>
-          <p class="text-sm text-[#6E6259]">Add new items or edit the details customers see in your shop.</p>
+          <h3 class="serif text-2xl">Product management</h3>
+          <p class="text-xs text-[#7A6F66]">Add new items or edit the details & photos customers see in your shop.</p>
         </div>
-        <button type="button" onclick="openProductForm()" class="rounded-full bg-[#C86D51] hover:bg-[#B35B40] text-white px-5 py-3 text-sm font-semibold">＋ Add product</button>
+        <button onclick="openProductModal()" class="px-5 py-2.5 rounded-full bg-[#A65D47] text-white text-sm font-medium hover:bg-[#8E4C38]">+ Add product</button>
       </div>
 
-      <div id="product-form-wrap" class="hidden bg-white border border-[#E4D8C8] rounded-2xl p-5 sm:p-6 mb-5">
-        <div class="flex justify-between items-center mb-4">
-          <h3 id="form-title" class="serif text-xl font-semibold">Add a product</h3>
-          <button type="button" onclick="closeProductForm()" class="text-[#6E6259] text-xl" aria-label="Close">×</button>
-        </div>
-        <form method="post" action="{{ url_for('save_product') }}" enctype="multipart/form-data" class="grid sm:grid-cols-2 gap-4">
-          {% if csrf_token is defined %}
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-          {% endif %}
-          <input type="hidden" name="product_id" id="f-id">
-          <label class="text-sm font-semibold">Product name *<input id="f-name" name="name" required class="field"></label>
-          <label class="text-sm font-semibold">Category *<input id="f-category" name="category" list="categories" required class="field" placeholder="e.g. Keychains">
-            <datalist id="categories">
-              <option>Keychains</option>
-              <option>Amigurumi</option>
-              <option>Wearables</option>
-              <option>Blankets</option>
-              <option>Accessories</option>
-              <option>Custom</option>
-            </datalist>
-          </label>
-          <label class="text-sm font-semibold">Price (₹) *<input id="f-price" name="price" type="number" min="0" step="0.01" required class="field"></label>
-          <label class="text-sm font-semibold">Stock quantity *<input id="f-stock" name="stock" type="number" min="0" step="1" value="0" required class="field"></label>
-          <label class="text-sm font-semibold">Yarn / material<input id="f-fiber" name="fiber" class="field" placeholder="Cotton yarn"></label>
-          <label class="text-sm font-semibold">Product badge<input id="f-badge" name="badge" class="field" placeholder="Bestseller / Ready to Ship"></label>
-          <label class="text-sm font-semibold sm:col-span-2">Description *<textarea id="f-description" name="description" required rows="3" class="field"></textarea></label>
-          <label class="text-sm font-semibold sm:col-span-2">Product image <span class="font-normal text-[#6E6259]">(JPG, PNG, WEBP or GIF; max 5 MB)</span><input name="image" type="file" accept=".jpg,.jpeg,.png,.webp,.gif" class="mt-2 block w-full text-sm"></label>
-          <label class="sm:col-span-2 flex items-center gap-2 text-sm"><input id="f-active" type="checkbox" name="active" checked class="accent-[#C86D51]"> Show this product in the customer shop</label>
-          <div class="sm:col-span-2 flex gap-2">
-            <button type="submit" class="rounded-full bg-[#C86D51] text-white px-6 py-3 text-sm font-semibold">Save product</button>
-            <button type="button" onclick="closeProductForm()" class="rounded-full bg-[#EFE7DC] px-6 py-3 text-sm">Cancel</button>
-          </div>
-        </form>
-      </div>
-
-      <div class="bg-white border border-[#E4D8C8] rounded-2xl overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm min-w-[760px]">
-            <thead class="bg-[#EFE7DC] text-left text-xs uppercase tracking-wide">
-              <tr><th class="p-4">Product</th><th class="p-4">Category</th><th class="p-4">Price</th><th class="p-4">Stock</th><th class="p-4">Visibility</th><th class="p-4">Actions</th></tr>
-            </thead>
-            <tbody class="divide-y divide-[#EFE7DC]">
-              {% for p in products or [] %}
-                <tr>
-                  <td class="p-4">
-                    <div class="flex items-center gap-3">
-                      <img src="{{ p.image_url }}" onerror="this.src='https://placehold.co/80x80/EFE7DC/3A322D?text=Image'" class="w-12 h-12 rounded-xl object-cover bg-[#EFE7DC]">
-                      <div><p class="font-semibold">{{ p.name }}</p><p class="text-xs text-[#6E6259]">{{ p.fiber }}</p></div>
-                    </div>
-                  </td>
-                  <td class="p-4">{{ p.category }}</td>
-                  <td class="p-4 font-semibold">₹{{ '%.2f'|format(p.price|float) }}</td>
-                  <td class="p-4">{{ p.stock }}</td>
-                  <td class="p-4"><span class="rounded-full px-2.5 py-1 text-xs {{ 'bg-green-50 text-green-700' if p.active else 'bg-gray-100 text-gray-600' }}">{{ 'Visible' if p.active else 'Hidden' }}</span></td>
-                  <td class="p-4">
-                    <div class="flex gap-2">
-                      <button type="button" class="edit-btn text-[#C86D51] font-semibold" data-product='{{ p.to_dict()|tojson|forceescape }}'>Edit</button>
-                      <form method="post" action="{{ url_for('delete_product', product_id=p.id) }}" onsubmit="return confirm('Delete this product?')">
-                        {% if csrf_token is defined %}
-                          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                        {% endif %}
-                        <button type="submit" class="text-red-600 font-semibold">Delete</button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-              {% else %}
-                <tr><td colspan="6" class="p-8 text-center text-[#6E6259]">No products yet. Add your first product above.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section id="orders" class="scroll-mt-24 mb-10">
-      <h2 class="serif text-2xl font-semibold">Customer orders</h2>
-      <p class="text-sm text-[#6E6259] mb-4">Review orders and update their status.</p>
-      <div class="bg-white border border-[#E4D8C8] rounded-2xl overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full min-w-[800px] text-sm">
-            <thead class="bg-[#EFE7DC] text-left text-xs uppercase">
-              <tr><th class="p-4">Order</th><th class="p-4">Customer / Contact</th><th class="p-4">Delivery address</th><th class="p-4">Payment</th><th class="p-4">Items</th><th class="p-4">Total</th><th class="p-4">Date</th><th class="p-4">Status</th></tr>
-            </thead>
-            <tbody class="divide-y divide-[#EFE7DC]">
-              {% for o in orders or [] %}
-                <tr>
-                  <td class="p-4 font-semibold">#{{ o.id }}</td>
-                  <td class="p-4">{{ o.customer_name }}<p class="text-xs text-[#6E6259]">{{ o.email }}</p><p class="text-xs text-[#6E6259]">{{ o.phone or 'Not provided' }}</p></td>
-                  <td class="p-4 whitespace-pre-wrap">{{ o.address or 'Not provided' }}</td>
-                  <td class="p-4">{{ o.payment_method or 'UPI' }}<p class="text-xs text-[#6E6259]">{{ o.payment_reference or 'Reference pending' }}</p></td>
-                  <td class="p-4">{% for item in o.items %}<div>{{ item.product_name }} × {{ item.quantity }}</div>{% endfor %}</td>
-                  <td class="p-4 font-semibold">₹{{ '%.2f'|format(o.total|float) }}</td>
-                  <td class="p-4">{{ o.created_at.strftime('%d %b %Y, %I:%M %p') if o.created_at else 'Date unavailable' }}</td>
-                  <td class="p-4">
-                    <form method="post" action="{{ url_for('update_order_status', order_id=o.id) }}" class="flex gap-2">
-                      {% if csrf_token is defined %}
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                      {% endif %}
-                      <select name="status" class="rounded-lg border border-[#E4D8C8] px-2 py-2">
-                        {% for s_opt in order_statuses %}
-                          <option value="{{ s_opt }}" {{ 'selected' if o.status == s_opt else '' }}>{{ s_opt }}</option>
-                        {% endfor %}
-                      </select>
-                      <button type="submit" class="text-[#C86D51] font-semibold">Save</button>
-                    </form>
-                  </td>
-                </tr>
-              {% else %}
-                <tr><td colspan="8" class="p-8 text-center text-[#6E6259]">No orders received yet.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section id="customers" class="scroll-mt-24 mb-10">
-      <h2 class="serif text-2xl font-semibold">Customers</h2>
-      <p class="text-sm text-[#6E6259] mb-4">Customers who have placed at least one order.</p>
-      <div class="bg-white border border-[#E4D8C8] rounded-2xl overflow-hidden">
-        <table class="w-full text-sm">
-          <thead class="bg-[#EFE7DC] text-left"><tr><th class="p-4">Customer name</th><th class="p-4">Email</th><th class="p-4">Phone</th></tr></thead>
-          <tbody class="divide-y divide-[#EFE7DC]">
-            {% for email, name, phone in customers or [] %}
-              <tr><td class="p-4">{{ name }}</td><td class="p-4">{{ email }}</td><td class="p-4">{{ phone or 'Not provided' }}</td></tr>
-            {% else %}
-              <tr><td colspan="3" class="p-6 text-center text-[#6E6259]">No customer records yet.</td></tr>
+      <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-[#E6DDD1] text-[11px] uppercase tracking-wider text-[#7A6F66]">
+              <th class="p-4">Product</th>
+              <th class="p-4">Category</th>
+              <th class="p-4">Price</th>
+              <th class="p-4">Stock</th>
+              <th class="p-4">Visibility</th>
+              <th class="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#E6DDD1] text-sm">
+            {% for p in products %}
+            <tr>
+              <td class="p-4 flex items-center gap-3">
+                <img src="{{ p.image_url }}" class="w-12 h-12 rounded-xl object-cover border border-[#E6DDD1]" />
+                <div>
+                  <p class="font-semibold">{{ p.name }}</p>
+                  <p class="text-xs text-[#7A6F66]">{{ p.subtitle }}</p>
+                </div>
+              </td>
+              <td class="p-4 text-[#7A6F66]">{{ p.category }}</td>
+              <td class="p-4 font-semibold">₹{{ "%.2f"|format(p.price) }}</td>
+              <td class="p-4">{{ p.stock }}</td>
+              <td class="p-4">
+                <span class="px-2.5 py-1 rounded-full text-xs {{ 'bg-emerald-100 text-emerald-800' if p.visible else 'bg-stone-200 text-stone-700' }}">
+                  {{ 'Visible' if p.visible else 'Hidden' }}
+                </span>
+              </td>
+              <td class="p-4 text-right space-x-3">
+  <button type="button"
+    onclick="editProductFromBtn(this)"
+    data-id="{{ p.id }}"
+    data-name="{{ p.name }}"
+    data-subtitle="{{ p.subtitle }}"
+    data-category="{{ p.category }}"
+    data-price="{{ p.price }}"
+    data-stock="{{ p.stock }}"
+    data-visible="{{ 'true' if p.visible else 'false' }}"
+    data-image="{{ p.image_url }}"
+    data-description="{{ p.description }}"
+    class="text-[#A65D47] font-medium hover:underline">Edit</button>
+  <form action="/admin/product/delete/{{ p.id }}" method="POST" class="inline" onsubmit="return confirm('Delete this product?')">
+    <button type="submit" class="text-red-600 hover:underline">Delete</button>
+  </form>
+</td>
+            </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </section>
 
-    <section id="commissions" class="scroll-mt-24 mb-10">
-      <h2 class="serif text-2xl font-semibold">Custom order inquiries</h2>
-      <p class="text-sm text-[#6E6259] mb-4">Requests submitted through the custom commission form.</p>
-      <div class="bg-white border border-[#E4D8C8] rounded-2xl overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full min-w-[760px] text-sm">
-            <thead class="bg-[#EFE7DC] text-left"><tr><th class="p-4">Customer</th><th class="p-4">Project</th><th class="p-4">Palette</th><th class="p-4">Details</th><th class="p-4">Received</th></tr></thead>
-            <tbody class="divide-y divide-[#EFE7DC]">
-              {% for c in commissions or [] %}
-                <tr>
-                  <td class="p-4">{{ c.name }}<p class="text-xs text-[#6E6259]">{{ c.email }}</p></td>
-                  <td class="p-4">{{ c.project_type }}</td>
-                  <td class="p-4">{{ c.yarn_color }}</td>
-                  <td class="p-4 whitespace-pre-wrap max-w-sm">{{ c.details }}</td>
-                  <td class="p-4">{{ c.created_at.strftime('%d %b %Y') if c.created_at else '' }}</td>
-                </tr>
-              {% else %}
-                <tr><td colspan="5" class="p-6 text-center text-[#6E6259]">No custom inquiries yet.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
+    <!-- TAB 2: ORDERS & CUSTOMER DETAILS -->
+    <section id="tab-orders" class="tab-section hidden mt-6 space-y-4">
+      <h3 class="serif text-2xl">Customer Orders</h3>
+      {% if not orders %}
+        <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-8 text-center text-sm text-[#7A6F66]">No customer orders placed yet.</div>
+      {% endif %}
+      {% for entry in orders %}
+      {% set o = entry.obj %}
+      <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-6">
+        <div class="flex flex-wrap justify-between gap-4 border-b border-[#E6DDD1] pb-4">
+          <div>
+            <span class="text-xs font-bold text-[#A65D47]">{{ o.invoice_no }}</span>
+            <h4 class="font-semibold text-lg">{{ o.customer_name }} <span class="text-xs font-normal text-[#7A6F66]">({{ o.instagram or 'No IG' }})</span></h4>
+            <p class="text-xs text-[#7A6F66]">📞 {{ o.phone }} • ✉️ {{ o.email or 'N/A' }} • Placed: {{ o.created_at }}</p>
+            <p class="text-xs text-[#2B2420] mt-1">📍 <strong>Shipping Address:</strong> {{ o.address }}</p>
+          </div>
+          <div class="text-right">
+            <p class="serif text-2xl font-semibold">₹{{ "%.2f"|format(o.total) }}</p>
+            <p class="text-xs text-emerald-700 font-medium">UPI UTR: {{ o.utr }}</p>
+            <form action="/admin/order/status/{{ o.id }}" method="POST" class="mt-2 flex items-center justify-end gap-2">
+              <select name="status" class="text-xs px-3 py-1.5 rounded-full border border-[#E6DDD1] bg-[#F6F1EA]">
+                {% for st in ['Pending Verification', 'Payment Verified', 'Crafting', 'Shipped', 'Delivered', 'Cancelled'] %}
+                <option value="{{ st }}" {{ 'selected' if o.status == st else '' }}>{{ st }}</option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="text-xs px-3 py-1.5 rounded-full bg-[#2B2420] text-white">Save</button>
+            </form>
+          </div>
+        </div>
+        <div class="pt-3 text-xs space-y-1">
+          <p class="font-semibold text-[#7A6F66] uppercase">Ordered Items:</p>
+          {% for item in entry["items"] %}
+          <div class="flex justify-between">
+            <span>{{ item.name }} × {{ item.qty }}</span>
+            <span>₹{{ "%.2f"|format(item.price * item.qty) }}</span>
+          </div>
+          {% endfor %}
         </div>
       </div>
+      {% endfor %}
     </section>
 
-    <section id="payment" class="scroll-mt-24 mb-10">
-      <div class="mb-4">
-        <h2 class="serif text-2xl font-semibold">UPI payment QR code</h2>
-        <p class="text-sm text-[#6E6259]">Upload the QR code customers should scan when placing an order. This replaces the currently saved QR code.</p>
-      </div>
-      <div class="bg-white border border-[#E4D8C8] rounded-2xl p-5 sm:p-6 grid md:grid-cols-2 gap-6 items-start">
-        <div>
-          <h3 class="font-semibold mb-2">Current QR code</h3>
-          {% if qr_setting and qr_setting.upi_qr_image %}
-            <img src="{{ qr_setting.upi_qr_image }}" alt="Current UPI payment QR code" class="w-56 h-56 object-contain rounded-xl border border-[#E4D8C8] bg-white p-2">
-            <p class="text-xs text-[#6E6259] mt-2">This is the QR code currently shown at checkout.</p>
-          {% else %}
-            <div class="w-56 h-56 rounded-xl border-2 border-dashed border-[#E4D8C8] bg-[#FAF6F0] flex items-center justify-center text-center p-5 text-sm text-[#6E6259]">No UPI QR code uploaded yet.</div>
-          {% endif %}
+    <!-- TAB 3: CUSTOM INQUIRIES -->
+    <section id="tab-inquiries" class="tab-section hidden mt-6 space-y-4">
+      <h3 class="serif text-2xl">Custom Crochet Inquiries</h3>
+      {% for inq in inquiries %}
+      <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-5">
+        <div class="flex justify-between">
+          <p class="font-semibold">{{ inq.name }} <span class="text-xs text-[#7A6F66]">({{ inq.contact }})</span></p>
+          <span class="text-xs text-[#7A6F66]">{{ inq.created_at }}</span>
         </div>
-        <div>
-          <h3 class="font-semibold mb-2">Upload or replace QR code</h3>
-          <form method="post" action="{{ url_for('upload_payment_qr') }}" enctype="multipart/form-data" class="space-y-4">
-            {% if csrf_token is defined %}
-              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <p class="text-sm text-[#A65D47] font-medium mt-1">{{ inq.item_type }} — Colors: {{ inq.colors }}</p>
+        <p class="text-xs text-[#7A6F66] mt-1">{{ inq.notes }}</p>
+      </div>
+      {% endfor %}
+    </section>
+
+    <!-- TAB 4: UPI QR SETTINGS -->
+    <section id="tab-settings" class="tab-section hidden mt-6">
+      <div class="max-w-xl bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-6">
+        <h3 class="serif text-2xl mb-4">UPI Scanner & Store Settings</h3>
+        <form action="/admin/settings" method="POST" enctype="multipart/form-data" class="space-y-4 text-sm">
+          <div>
+            <label class="block text-xs font-semibold uppercase text-[#7A6F66] mb-1">Your UPI ID (GPay / PhonePe / Paytm)</label>
+            <input type="text" name="upi_id" value="{{ settings.upi_id }}" required class="w-full px-4 py-2.5 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-[#7A6F66] mb-1">Payee Display Name</label>
+            <input type="text" name="upi_name" value="{{ settings.upi_name }}" required class="w-full px-4 py-2.5 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-[#7A6F66] mb-1">Upload Your UPI QR Scanner Photo</label>
+            <input type="file" name="qr_file" accept="image/*" class="w-full text-xs" />
+            {% if settings.qr_image_url %}
+              <img src="{{ settings.qr_image_url }}" class="w-36 h-36 object-contain mt-3 rounded-xl border border-[#E6DDD1] p-2 bg-white" />
             {% endif %}
-            <label class="block text-sm font-semibold">Choose your UPI QR image
-              <input type="file" name="qr_image" accept=".png,.jpg,.jpeg,.webp,.gif,image/png,image/jpeg,image/webp,image/gif" required class="mt-2 block w-full text-sm file:mr-3 file:rounded-full file:border-0 file:bg-[#EFE7DC] file:px-4 file:py-2 file:font-semibold">
-            </label>
-            <p class="text-xs text-[#6E6259]">Accepted formats: PNG, JPG, JPEG, WEBP or GIF. Maximum upload size: 5 MB.</p>
-            <button type="submit" class="rounded-full bg-[#C86D51] hover:bg-[#B35B40] text-white px-6 py-3 text-sm font-semibold">Upload UPI QR code</button>
-          </form>
-        </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold uppercase text-[#7A6F66] mb-1">Shipping Fee (₹)</label>
+              <input type="number" name="shipping_fee" value="{{ settings.shipping_fee }}" class="w-full px-4 py-2.5 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase text-[#7A6F66] mb-1">Free Shipping Above (₹)</label>
+              <input type="number" name="free_shipping_above" value="{{ settings.free_shipping_above }}" class="w-full px-4 py-2.5 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-[#7A6F66] mb-1">Change Admin Password (Optional)</label>
+            <input type="password" name="new_password" placeholder="Leave blank to keep current password" class="w-full px-4 py-2.5 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+          </div>
+          <button type="submit" class="px-6 py-3 rounded-full bg-[#A65D47] text-white font-medium">Save Settings</button>
+        </form>
       </div>
     </section>
-
-    <p class="text-xs text-[#6E6259] text-center py-5">The Loop Atelier · Admin workspace</p>
   </main>
 
-  <style>.field{display:block;width:100%;margin-top:.5rem;border:1px solid #E4D8C8;border-radius:.75rem;background:#FAF6F0;padding:.75rem .9rem;font-weight:400;outline:none}.field:focus{border-color:#C86D51;box-shadow:0 0 0 3px #C86D5122}</style>
+  <!-- ADD / EDIT PRODUCT MODAL -->
+  <div id="productModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4 z-50">
+    <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl max-w-lg w-full p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="modalTitle" class="serif text-2xl">Add Product</h3>
+        <button onclick="closeProductModal()" class="text-xl text-[#7A6F66]">&times;</button>
+      </div>
+      <form action="/admin/product/save" method="POST" enctype="multipart/form-data" class="space-y-3 text-sm">
+        <input type="hidden" name="id" id="prod-id" />
+        <div>
+          <label class="block text-xs font-semibold text-[#7A6F66]">Product Name</label>
+          <input type="text" name="name" id="prod-name" required class="w-full px-3.5 py-2 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-[#7A6F66]">Yarn / Subtitle</label>
+            <input type="text" name="subtitle" id="prod-subtitle" value="100% Combed Cotton" class="w-full px-3.5 py-2 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#7A6F66]">Category</label>
+            <select name="category" id="prod-category" class="w-full px-3.5 py-2 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]">
+              <option>Wearables & Bags</option>
+              <option>Amigurumi & Plush</option>
+              <option>Floral & Keepsakes</option>
+              <option>Book & Pet Accessories</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-[#7A6F66]">Price (₹)</label>
+            <input type="number" step="0.01" name="price" id="prod-price" required class="w-full px-3.5 py-2 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#7A6F66]">Stock</label>
+            <input type="number" name="stock" id="prod-stock" value="3" required class="w-full px-3.5 py-2 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#7A6F66]">Visibility</label>
+            <select name="visible" id="prod-visible" class="w-full px-3.5 py-2 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]">
+              <option value="true">Visible</option>
+              <option value="false">Hidden</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#7A6F66]">Upload Photo from Device</label>
+          <input type="file" name="image_file" accept="image/*" class="w-full text-xs mt-1" />
+          <input type="hidden" name="image_url" id="prod-image-url" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#7A6F66]">Description</label>
+          <textarea name="description" id="prod-description" rows="2" class="w-full px-3.5 py-2 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2 rounded-full border border-[#E6DDD1]">Cancel</button>
+          <button type="submit" class="px-6 py-2 rounded-full bg-[#A65D47] text-white font-medium">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
-    function openProductForm() {
-      document.getElementById('product-form-wrap').classList.remove('hidden');
-      document.getElementById('form-title').textContent = 'Add a product';
-      document.querySelector('#product-form-wrap form').reset();
-      document.getElementById('f-id').value = '';
-      document.getElementById('f-active').checked = true;
-      document.getElementById('product-form-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    function showTab(name) {
+      document.querySelectorAll('.tab-section').forEach(s => s.classList.add('hidden'));
+      document.getElementById('tab-' + name).classList.remove('hidden');
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('bg-[#2B2420]', 'text-white');
+        b.classList.add('bg-[#FDFBF8]', 'text-[#2B2420]');
+      });
+      const active = document.getElementById('tab-btn-' + name);
+      active.classList.remove('bg-[#FDFBF8]', 'text-[#2B2420]');
+      active.classList.add('bg-[#2B2420]', 'text-white');
     }
-    function closeProductForm() {
-      document.getElementById('product-form-wrap').classList.add('hidden');
+    if (location.hash === '#orders') showTab('orders');
+    if (location.hash === '#settings') showTab('settings');
+
+    function openProductModal() {
+      document.getElementById('modalTitle').innerText = 'Add Product';
+      document.getElementById('prod-id').value = '';
+      document.getElementById('prod-name').value = '';
+      document.getElementById('prod-price').value = '';
+      document.getElementById('prod-stock').value = '3';
+      document.getElementById('prod-description').value = '';
+      document.getElementById('prod-image-url').value = '';
+      document.getElementById('productModal').classList.remove('hidden');
+      document.getElementById('productModal').classList.add('flex');
     }
-    document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => {
-      const p = JSON.parse(btn.dataset.product);
-      document.getElementById('product-form-wrap').classList.remove('hidden');
-      document.getElementById('form-title').textContent = 'Edit product';
-      document.getElementById('f-id').value = p.id;
-      document.getElementById('f-name').value = p.name;
-      document.getElementById('f-category').value = p.category;
-      document.getElementById('f-price').value = p.price;
-      document.getElementById('f-stock').value = p.stock ?? 0;
-      document.getElementById('f-fiber').value = p.fiber || '';
-      document.getElementById('f-badge').value = p.badge || '';
-      document.getElementById('f-description').value = p.description || '';
-      document.getElementById('f-active').checked = !!p.active;
-      document.getElementById('product-form-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }));
+    function editProductFromBtn(btn) {
+  document.getElementById('modalTitle').innerText = 'Edit Product';
+  document.getElementById('prod-id').value = btn.dataset.id;
+  document.getElementById('prod-name').value = btn.dataset.name;
+  document.getElementById('prod-subtitle').value = btn.dataset.subtitle;
+  document.getElementById('prod-category').value = btn.dataset.category;
+  document.getElementById('prod-price').value = btn.dataset.price;
+  document.getElementById('prod-stock').value = btn.dataset.stock;
+  document.getElementById('prod-visible').value = btn.dataset.visible;
+  document.getElementById('prod-image-url').value = btn.dataset.image;
+  document.getElementById('prod-description').value = btn.dataset.description;
+  document.getElementById('productModal').classList.remove('hidden');
+  document.getElementById('productModal').classList.add('flex');
+}
+    function closeProductModal() {
+      document.getElementById('productModal').classList.add('hidden');
+      document.getElementById('productModal').classList.remove('flex');
+    }
   </script>
 </body>
 </html>
