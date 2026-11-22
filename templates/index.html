@@ -184,9 +184,18 @@
         <div class="flex justify-between text-sm"><span class="text-taupe">Subtotal</span><strong id="cart-subtotal">₹0.00</strong></div>
         <p class="text-xs text-taupe">Final delivery charges, if any, will be confirmed by the studio.</p>
         <form onsubmit="submitBasketOrder(event)" class="space-y-3">
-          <input id="checkout-name" required placeholder="Your name" class="form-input">
+          <input id="checkout-name" required placeholder="Your full name" class="form-input">
           <input id="checkout-email" type="email" required placeholder="Email address" class="form-input">
-          <button id="checkout-submit" type="submit" class="w-full py-3.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-white font-semibold text-sm">Place Order Inquiry</button>
+          <input id="checkout-phone" type="tel" required pattern="[0-9+() -]{8,20}" placeholder="Phone number" class="form-input">
+          <textarea id="checkout-address" required rows="2" placeholder="Full delivery address" class="form-input"></textarea>
+          <div class="rounded-2xl border border-sand bg-cream p-4 space-y-2">
+            <p class="font-semibold text-sm">UPI payment only</p>
+            <img id="checkout-qr" class="hidden mx-auto max-h-48 rounded-xl object-contain" alt="Studio UPI payment QR code">
+            <p id="qr-unavailable" class="text-xs text-taupe">The studio's UPI QR code has not been uploaded yet. Please contact the studio before paying.</p>
+            <input id="payment-reference" placeholder="UPI transaction ID / UTR (after payment)" class="form-input">
+            <p class="text-xs text-taupe">Scan the QR code, pay the displayed order total, then enter your UPI transaction reference.</p>
+          </div>
+          <button id="checkout-submit" type="submit" class="w-full py-3.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-white font-semibold text-sm">Place UPI Order</button>
         </form>
       </div>
     </aside>
@@ -216,6 +225,7 @@
       lucide.createIcons();
       updateCartUI();
       await loadProducts();
+      await loadPaymentQR();
     });
 
     async function loadProducts(){
@@ -356,56 +366,41 @@
       finally{button.disabled=false;button.innerHTML='Send Inquiry <i data-lucide="send" class="w-4 h-4"></i>';lucide.createIcons();}
     }
 
-    async function submitBasketOrder(e) {
-    e.preventDefault();
-    const form = e.target;
-    const emailEl = document.getElementById('checkout-email') || form.querySelector('input[type="email"]');
-    const nameEl = document.getElementById('checkout-name') || form.querySelector('input[type="text"]');
-    const email = (emailEl ? emailEl.value : '').trim();
-    const customerName = (nameEl && nameEl.value.trim()) ? nameEl.value.trim() : email.split('@')[0];
-
-    const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * item.qty), 0);
-    const simplifiedItems = cart.map(item => ({
-        id: item.id,
-        name: item.name,
-        qty: item.qty,
-        price: item.price
-    }));
-
-    try {
-        const response = await fetch('/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name: customerName,
-                email: email,
-                items: simplifiedItems,
-                total: subtotal
-            })
-        });
-
-        const rawText = await response.text();
-        let result = {};
-        try {
-            result = rawText ? JSON.parse(rawText) : {};
-        } catch {
-            showToast(`Order failed (HTTP ${response.status}). Server returned HTML instead of JSON.`);
-            return;
-        }
-
-        if (response.ok) {
-            cart = [];
-            updateCartUI();
-            toggleCart();
-            showToast(`Order #${result.order_id} confirmed! Invoice sent to ${email}.`);
-            form.reset();
-        } else {
-            showToast(result.error || `Could not place order (HTTP ${response.status}).`);
-        }
-    } catch (err) {
-        showToast('Network error connecting to studio server.');
+    async function loadPaymentQR(){
+      try{
+        const response=await fetch('/api/payment-qr');
+        const data=await response.json();
+        const img=document.getElementById('checkout-qr');
+        const note=document.getElementById('qr-unavailable');
+        if(data.image_url){img.src=data.image_url;img.classList.remove('hidden');note.classList.add('hidden');}
+      }catch(_error){ /* QR will remain unavailable until server responds */ }
     }
-}
+
+    async function submitBasketOrder(event){
+      event.preventDefault();
+      if(!cart.length){showToast('Your basket is empty.');return;}
+      const button=document.getElementById('checkout-submit');
+      button.disabled=true;button.textContent='Submitting…';
+      const payload={
+        name:document.getElementById('checkout-name').value.trim(),
+        email:document.getElementById('checkout-email').value.trim(),
+        phone:document.getElementById('checkout-phone').value.trim(),
+        address:document.getElementById('checkout-address').value.trim(),
+        payment_method:'UPI',
+        payment_reference:document.getElementById('payment-reference').value.trim(),
+        items:cart.map(item=>({id:item.id,qty:item.qty}))
+      };
+      try{
+        const response=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const raw=await response.text();let result={};
+        try{result=raw?JSON.parse(raw):{};}catch(_e){throw new Error(`Order failed (HTTP ${response.status}). The server returned an unexpected response.`);}
+        if(!response.ok)throw new Error(result.error||`Order failed (HTTP ${response.status}).`);
+        cart=[];updateCartUI();toggleCart();event.target.reset();
+        showToast(`Order #${result.order_id} received. Total: ${money(result.total)}. We will contact you to confirm payment.`);
+      }catch(error){showToast(error.message||'Network error connecting to studio server.');}
+      finally{button.disabled=false;button.textContent='Place UPI Order';}
+    }
+
 
     function showToast(message){
       const container=document.getElementById('toast-container');

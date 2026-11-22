@@ -9,7 +9,6 @@ from flask import (
     request, session, url_for
 )
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import inspect
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
@@ -46,16 +45,10 @@ class Product(db.Model):
 
     def to_dict(self):
         return {
-            "id": self.id,
-            "name": self.name,
-            "category": self.category,
-            "price": self.price,
-            "fiber": self.fiber,
-            "badge": self.badge,
-            "description": self.description,
-            "image_url": self.image_url,
-            "stock": self.stock,
-            "active": self.active,
+            "id": self.id, "name": self.name, "category": self.category,
+            "price": self.price, "fiber": self.fiber, "badge": self.badge,
+            "description": self.description, "image_url": self.image_url,
+            "stock": self.stock, "active": self.active
         }
 
 
@@ -69,6 +62,10 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(160), nullable=False)
+    phone = db.Column(db.String(30), nullable=False, default="")
+    address = db.Column(db.Text, nullable=False, default="")
+    payment_method = db.Column(db.String(30), nullable=False, default="UPI")
+    payment_reference = db.Column(db.String(100), nullable=False, default="")
     total = db.Column(db.Float, nullable=False, default=0)
     status = db.Column(db.String(30), nullable=False, default="Pending")
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -82,6 +79,11 @@ class OrderItem(db.Model):
     product_name = db.Column(db.String(120), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     unit_price = db.Column(db.Float, nullable=False)
+
+
+class SiteSetting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    upi_qr_image = db.Column(db.String(255), nullable=False, default="")
 
 
 class Commission(db.Model):
@@ -138,99 +140,62 @@ def seed_products():
     if Product.query.first():
         return
     samples = [
-        Product(
-            name="Strawberry Bag Charm",
-            category="Keychains",
-            price=100,
-            fiber="Soft Cotton & Milk Yarn",
-            badge="Bestseller",
-            description="Handcrafted crochet strawberry bag charm.",
-            image_url="/static/cro2.jpeg",
-            stock=10,
-        ),
-        Product(
-            name="Daisy Keychain",
-            category="Keychains",
-            price=75,
-            fiber="Velvet Chenille",
-            badge="Ready to Ship",
-            description="Beautiful handmade crochet daisy keychain.",
-            image_url="/static/cro3.jpeg",
-            stock=12,
-        ),
-        Product(
-            name="Heirloom Waffle Throw",
-            category="Blankets",
-            price=145,
-            fiber="Merino Wool Blend",
-            badge="Made to Order",
-            description="Textured waffle-stitch throw blanket.",
-            image_url="/static/cro4.jpeg",
-            stock=3,
-        ),
-        Product(
-            name="Meadow Granny Square Tote",
-            category="Wearables",
-            price=620,
-            fiber="Mercerized Cotton",
-            badge="New",
-            description="Handmade granny square tote bag.",
-            image_url="/static/cro5.jpeg",
-            stock=5,
-        ),
-        Product(
-            name="Mini Charm & Keychain Trio",
-            category="Accessories",
-            price=240,
-            fiber="Fine Yarn & Beaded Accents",
-            badge="Limited",
-            description="Handmade charms for bags and keys.",
-            image_url="/static/cro1.jpeg",
-            stock=8,
-        ),
+        Product(name="Strawberry Bag Charm", category="Keychains", price=100,
+                fiber="Soft Cotton & Milk Yarn", badge="Bestseller",
+                description="Handcrafted crochet strawberry bag charm.",
+                image_url="/static/cro2.jpeg", stock=10),
+        Product(name="Daisy Keychain", category="Keychains", price=75,
+                fiber="Velvet Chenille", badge="Ready to Ship",
+                description="Beautiful handmade crochet daisy keychain.",
+                image_url="/static/cro3.jpeg", stock=12),
+        Product(name="Heirloom Waffle Throw", category="Blankets", price=145,
+                fiber="Merino Wool Blend", badge="Made to Order",
+                description="Textured waffle-stitch throw blanket.",
+                image_url="/static/cro4.jpeg", stock=3),
+        Product(name="Meadow Granny Square Tote", category="Wearables", price=620,
+                fiber="Mercerized Cotton", badge="New",
+                description="Handmade granny square tote bag.",
+                image_url="/static/cro5.jpeg", stock=5),
+        Product(name="Mini Charm & Keychain Trio", category="Accessories", price=240,
+                fiber="Fine Yarn & Beaded Accents", badge="Limited",
+                description="Handmade charms for bags and keys.",
+                image_url="/static/cro6.jpeg", stock=8),
     ]
     db.session.add_all(samples)
     db.session.commit()
 
 
-def upgrade_sqlite_schema():
-    if db.engine.dialect.name != "sqlite":
-        return
-    inspector = inspect(db.engine)
-    with db.engine.begin() as connection:
-        if inspector.has_table("product"):
-            product_columns = {col["name"] for col in inspector.get_columns("product")}
-            if "stock" not in product_columns:
-                connection.exec_driver_sql("ALTER TABLE product ADD COLUMN stock INTEGER NOT NULL DEFAULT 0")
-            if "active" not in product_columns:
-                connection.exec_driver_sql("ALTER TABLE product ADD COLUMN active BOOLEAN NOT NULL DEFAULT 1")
-
-        if inspector.has_table("order"):
-            order_columns = {col["name"] for col in inspector.get_columns("order")}
-            if "email" not in order_columns:
-                connection.exec_driver_sql(
-                    'ALTER TABLE "order" ADD COLUMN email VARCHAR(160) NOT NULL DEFAULT \'\''
-                )
-            if "total" not in order_columns:
-                connection.exec_driver_sql(
-                    'ALTER TABLE "order" ADD COLUMN total FLOAT NOT NULL DEFAULT 0'
-                )
-            if "status" not in order_columns:
-                connection.exec_driver_sql(
-                    'ALTER TABLE "order" ADD COLUMN status VARCHAR(30) NOT NULL DEFAULT \'Pending\''
-                )
-            if "created_at" not in order_columns:
-                connection.exec_driver_sql(
-                    'ALTER TABLE "order" ADD COLUMN created_at DATETIME'
-                )
-
-
 with app.app_context():
     Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
     db.create_all()
-    upgrade_sqlite_schema()
-    seed_products()
 
+    # Add columns to existing databases (db.create_all() does not alter old tables).
+    from sqlalchemy import inspect
+    inspector = inspect(db.engine)
+    with db.engine.begin() as connection:
+        if inspector.has_table("order"):
+            existing = {c["name"] for c in inspector.get_columns("order")}
+            additions = {
+                "email": "VARCHAR(160) NOT NULL DEFAULT ''",
+                "phone": "VARCHAR(30) NOT NULL DEFAULT ''",
+                "address": "TEXT NOT NULL DEFAULT ''",
+                "payment_method": "VARCHAR(30) NOT NULL DEFAULT 'UPI'",
+                "payment_reference": "VARCHAR(100) NOT NULL DEFAULT ''",
+                "total": "FLOAT NOT NULL DEFAULT 0",
+                "status": "VARCHAR(30) NOT NULL DEFAULT 'Pending'",
+                "created_at": "TIMESTAMP NULL",
+            }
+            for column, definition in additions.items():
+                if column not in existing:
+                    connection.exec_driver_sql(f'ALTER TABLE "order" ADD COLUMN {column} {definition}')
+        if inspector.has_table("product"):
+            existing = {c["name"] for c in inspector.get_columns("product")}
+            for column, definition in {"stock": "INTEGER NOT NULL DEFAULT 0", "active": "BOOLEAN NOT NULL DEFAULT TRUE"}.items():
+                if column not in existing:
+                    connection.exec_driver_sql(f'ALTER TABLE product ADD COLUMN {column} {definition}')
+
+    seed_products()
+    # First-run admin account. Set ADMIN_EMAIL and ADMIN_PASSWORD before deployment.
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@loopatelier.com").strip().lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "ChangeMe123!")
     if not AdminUser.query.filter_by(email=admin_email).first():
@@ -257,32 +222,46 @@ def create_order():
     data = request.get_json(silent=True) or {}
     name = str(data.get("name", "")).strip()
     email = str(data.get("email", "")).strip().lower()
+    phone = str(data.get("phone", "")).strip()
+    address = str(data.get("address", "")).strip()
+    payment_method = str(data.get("payment_method", "UPI")).strip().upper()
+    payment_reference = str(data.get("payment_reference", "")).strip()
     items = data.get("items", [])
-    if not name or "@" not in email or not isinstance(items, list) or not items:
-        return jsonify(error="Enter a valid name, email and at least one product."), 400
+    if not name or "@" not in email or not phone or not address or not isinstance(items, list) or not items:
+        return jsonify(error="Please enter your name, valid email, phone, delivery address and products."), 400
+    if payment_method != "UPI":
+        return jsonify(error="Only UPI payment is accepted."), 400
+    try:
+        order = Order(customer_name=name, email=email, phone=phone, address=address,
+                      payment_method="UPI", payment_reference=payment_reference, total=0)
+        calculated_total = 0
+        for row in items:
+            product_id, quantity = int(row.get("id")), int(row.get("qty"))
+            product = db.session.get(Product, product_id)
+            if not product or not product.active or quantity < 1:
+                return jsonify(error="One of the selected products is unavailable."), 400
+            if product.stock > 0 and quantity > product.stock:
+                return jsonify(error=f"Only {product.stock} units of {product.name} are available."), 400
+            calculated_total += product.price * quantity
+            order.items.append(OrderItem(product_id=product.id, product_name=product.name,
+                                         quantity=quantity, unit_price=product.price))
+        order.total = round(calculated_total, 2)
+        db.session.add(order)
+        db.session.commit()
+        return jsonify(status="ok", order_id=order.id, total=order.total), 201
+    except (TypeError, ValueError, AttributeError):
+        db.session.rollback()
+        return jsonify(error="Invalid product details in your basket."), 400
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Order creation failed")
+        return jsonify(error="The order could not be saved. Please try again or contact the studio."), 500
 
-    order = Order(customer_name=name, email=email, total=0)
-    calculated_total = 0
-    for row in items:
-        try:
-            product_id = int(row.get("id"))
-            quantity = int(row.get("qty"))
-        except (TypeError, ValueError, AttributeError):
-            return jsonify(error="Invalid product details."), 400
-        product = db.session.get(Product, product_id)
-        if not product or not product.active or quantity < 1:
-            return jsonify(error="One of the selected products is unavailable."), 400
-        calculated_total += product.price * quantity
-        order.items.append(OrderItem(
-            product_id=product.id,
-            product_name=product.name,
-            quantity=quantity,
-            unit_price=product.price,
-        ))
-    order.total = round(calculated_total, 2)
-    db.session.add(order)
-    db.session.commit()
-    return jsonify(status="ok", order_id=order.id, total=order.total), 201
+
+@app.get("/api/payment-qr")
+def payment_qr():
+    setting = db.session.get(SiteSetting, 1)
+    return jsonify(image_url=setting.upi_qr_image if setting else "")
 
 
 @app.post("/api/commissions")
@@ -292,11 +271,10 @@ def create_commission():
     if any(not str(data.get(k, "")).strip() for k in required) or "@" not in str(data.get("email", "")):
         return jsonify(error="Please complete all required fields with a valid email."), 400
     commission = Commission(
-        name=str(data["name"]).strip(),
-        email=str(data["email"]).strip().lower(),
+        name=str(data["name"]).strip(), email=str(data["email"]).strip().lower(),
         project_type=str(data["project_type"]).strip(),
         yarn_color=str(data["yarn_color"]).strip(),
-        details=str(data["details"]).strip(),
+        details=str(data["details"]).strip()
     )
     db.session.add(commission)
     db.session.commit()
@@ -337,7 +315,8 @@ def admin_dashboard():
     products = Product.query.order_by(Product.id.desc()).all()
     orders = Order.query.order_by(Order.created_at.desc()).all()
     commissions = Commission.query.order_by(Commission.created_at.desc()).all()
-    customers = db.session.query(Order.email, Order.customer_name).distinct().all()
+    qr_setting = db.session.get(SiteSetting, 1)
+    customers = db.session.query(Order.email, Order.customer_name, Order.phone).distinct().all()
     revenue = db.session.query(db.func.coalesce(db.func.sum(Order.total), 0)).filter(
         Order.status != "Cancelled"
     ).scalar()
@@ -351,14 +330,32 @@ def admin_dashboard():
         "commissions": Commission.query.count(),
     }
     return render_template(
-        "admin_dashboard.html",
-        products=products,
-        orders=orders,
-        commissions=commissions,
-        customers=customers,
-        stats=stats,
-        statuses=ORDER_STATUSES,
+        "admin_dashboard.html", products=products, orders=orders,
+        commissions=commissions, customers=customers, stats=stats,
+        statuses=ORDER_STATUSES, qr_setting=qr_setting
     )
+
+
+@app.post("/admin/payment-qr")
+@admin_required
+def upload_payment_qr():
+    verify_csrf()
+    uploaded = request.files.get("qr_image")
+    if not uploaded or not uploaded.filename:
+        flash("Choose a UPI QR image to upload.", "error")
+        return redirect(url_for("admin_dashboard") + "#payment")
+    if not allowed_file(uploaded.filename):
+        flash("Upload a PNG, JPG, JPEG, WEBP or GIF image.", "error")
+        return redirect(url_for("admin_dashboard") + "#payment")
+    filename = f"upi_qr_{secrets.token_hex(8)}_{secure_filename(uploaded.filename)}"
+    Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
+    uploaded.save(Path(app.config["UPLOAD_FOLDER"]) / filename)
+    setting = db.session.get(SiteSetting, 1) or SiteSetting(id=1)
+    setting.upi_qr_image = f"/static/uploads/{filename}"
+    db.session.add(setting)
+    db.session.commit()
+    flash("UPI QR code uploaded successfully.", "success")
+    return redirect(url_for("admin_dashboard") + "#payment")
 
 
 @app.post("/admin/products/save")
@@ -410,6 +407,7 @@ def save_product():
 def delete_product(product_id):
     verify_csrf()
     product = db.get_or_404(Product, product_id)
+    # Keep historical order items intact; they store the product name and price.
     db.session.delete(product)
     db.session.commit()
     flash("Product deleted.", "success")
@@ -436,4 +434,4 @@ def too_large(_error):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+    app.run(host="127.0.0.1", port=int(os.environ.get("PORT", 5000)), debug=True)
