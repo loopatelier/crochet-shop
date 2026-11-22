@@ -38,6 +38,13 @@
             }
         }
     </script>
+    <style>
+        @media print {
+            body > :not(#invoice-modal) { display: none !important; }
+            #invoice-modal { position: static !important; background: white !important; padding: 0 !important; }
+            #invoice-actions { display: none !important; }
+        }
+    </style>
 </head>
 <body class="bg-cream text-charcoal font-sans antialiased selection:bg-terracotta/20 selection:text-terracotta">
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
@@ -66,13 +73,13 @@
             </nav>
 
             <div class="flex items-center gap-3">
-                <button onclick="toggleCart()" class="relative p-2.5 rounded-full bg-beige hover:bg-sand text-charcoal transition-colors flex items-center gap-2 px-4" aria-label="Open Cart">
+                <button type="button" onclick="toggleCart()" class="relative p-2.5 rounded-full bg-beige hover:bg-sand text-charcoal transition-colors flex items-center gap-2 px-4" aria-label="Open Cart">
                     <i data-lucide="shopping-bag" class="w-5 h-5 text-terracotta"></i>
                     <span class="text-sm font-semibold hidden sm:inline">Basket</span>
                     <span id="cart-badge" class="bg-terracotta text-cream text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
                 </button>
 
-                <button onclick="toggleMobileMenu()" class="md:hidden p-2.5 rounded-full bg-beige text-charcoal hover:bg-sand" aria-label="Menu">
+                <button type="button" onclick="toggleMobileMenu()" class="md:hidden p-2.5 rounded-full bg-beige text-charcoal hover:bg-sand" aria-label="Menu">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -162,8 +169,8 @@
                     <button type="button" onclick="filterProducts('blankets')" data-category="blankets" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand">
                         Blankets
                     </button>
-                    <button type="button" onclick="filterProducts('custom')" data-category="custom" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand">
-                        Custom Slots
+                    <button type="button" onclick="filterProducts('accessories')" data-category="accessories" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-cream text-taupe hover:bg-sand/70 border border-sand">
+                        Accessories
                     </button>
                 </div>
 
@@ -378,23 +385,114 @@
 
             <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
 
-            <div id="cart-footer" class="p-6 border-t border-sand bg-beige/40 space-y-4">
-                <div class="space-y-1.5">
+            <div id="cart-footer" class="p-5 border-t border-sand bg-beige/40 space-y-3 overflow-y-auto max-h-[68vh]">
+                <div class="space-y-1">
                     <div class="flex justify-between text-sm text-taupe">
-                        <span>Estimated Subtotal</span>
+                        <span>Subtotal</span>
                         <span id="cart-subtotal" class="font-semibold text-charcoal">₹0.00</span>
                     </div>
-                    <p class="text-xs text-taupe">Complimentary plastic-free shipping on orders over ₹2,500.</p>
+                    <div class="flex justify-between text-xs text-taupe">
+                        <span>Shipping (Free above ₹2,500)</span>
+                        <span id="cart-shipping" class="font-semibold text-charcoal">₹80.00</span>
+                    </div>
+                    <div class="flex justify-between text-sm font-semibold text-charcoal pt-1 border-t border-sand/70">
+                        <span>Total Payable</span>
+                        <span id="cart-total">₹0.00</span>
+                    </div>
                 </div>
 
-                <form onsubmit="submitBasketOrder(event)" class="space-y-3 pt-2">
-                    <input type="text" id="checkout-name" placeholder="Your name (optional)" class="w-full px-4 py-2.5 rounded-xl bg-cream border border-sand text-sm focus:border-terracotta outline-none">
-                    <input type="email" id="checkout-email" required placeholder="Enter your email to reserve &amp; checkout..." class="w-full px-4 py-2.5 rounded-xl bg-cream border border-sand text-sm focus:border-terracotta outline-none">
+                {% if qr_setting and (qr_setting.upi_qr_image or qr_setting.upi_id) %}
+                    <div class="p-3 rounded-2xl bg-cream border border-sand space-y-2">
+                        <p class="text-xs font-semibold text-charcoal">UPI Payment Details</p>
+                        {% if qr_setting.upi_id %}
+                            <p class="text-xs text-taupe">UPI ID: <strong class="text-charcoal">{{ qr_setting.upi_id }}</strong></p>
+                        {% endif %}
+                        {% if qr_setting.upi_qr_image %}
+                            <img src="{{ qr_setting.upi_qr_image }}" alt="UPI QR Code" class="w-28 h-28 object-contain rounded-xl border border-sand bg-white p-1">
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <form onsubmit="submitBasketOrder(event)" class="space-y-2.5 pt-1">
+                    <input type="text" id="checkout-name" required placeholder="Full Name *" class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-sand text-sm focus:border-terracotta outline-none">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <input type="email" id="checkout-email" required placeholder="Email Address *" class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-sand text-sm focus:border-terracotta outline-none">
+                        <input type="tel" id="checkout-phone" required placeholder="Phone Number *" class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-sand text-sm focus:border-terracotta outline-none">
+                    </div>
+                    <textarea id="checkout-address" rows="2" required placeholder="Complete Delivery Address (House/Flat, Street, City, Pincode) *" class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-sand text-sm focus:border-terracotta outline-none"></textarea>
+                    <input type="text" id="checkout-payment-ref" placeholder="UPI Transaction / UTR Reference (optional)" class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-sand text-sm focus:border-terracotta outline-none">
+
                     <button type="submit" class="w-full py-3.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-cream font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2">
-                        <span>Complete Order Inquiry</span>
+                        <span>Place Order &amp; Generate Invoice</span>
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </button>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Invoice Modal -->
+    <div id="invoice-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-charcoal/60 backdrop-blur-xs p-4 sm:p-6">
+        <div class="max-w-2xl mx-auto bg-cream rounded-3xl border border-sand shadow-2xl p-6 sm:p-8 space-y-6 my-6">
+            <div class="flex items-start justify-between gap-4 border-b border-sand pb-5">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-sage-dark">Order Receipt &amp; Invoice</span>
+                    <h3 class="font-serif text-2xl sm:text-3xl font-semibold text-charcoal mt-1">The Loop Atelier</h3>
+                    <p id="inv-number-date" class="text-xs text-taupe mt-1"></p>
+                </div>
+                <span id="inv-status" class="px-3 py-1 rounded-full bg-sage-light text-sage-dark text-xs font-semibold"></span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-beige/60 p-4 rounded-2xl border border-sand/80">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-taupe">Billed &amp; Shipped To</p>
+                    <p id="inv-customer-name" class="font-semibold text-charcoal mt-1"></p>
+                    <p id="inv-customer-contact" class="text-xs text-taupe mt-0.5"></p>
+                    <p id="inv-customer-address" class="text-xs text-taupe mt-1 whitespace-pre-line"></p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-taupe">Payment Information</p>
+                    <p id="inv-payment-method" class="font-semibold text-charcoal mt-1"></p>
+                    <p id="inv-payment-ref" class="text-xs text-taupe mt-0.5"></p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-beige text-left text-xs uppercase text-taupe">
+                        <tr>
+                            <th class="p-3 rounded-l-xl">Item</th>
+                            <th class="p-3">Qty</th>
+                            <th class="p-3">Rate</th>
+                            <th class="p-3 rounded-r-xl text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inv-items-body" class="divide-y divide-sand/70"></tbody>
+                </table>
+            </div>
+
+            <div class="border-t border-sand pt-4 space-y-1.5 text-sm">
+                <div class="flex justify-between text-taupe">
+                    <span>Subtotal</span>
+                    <span id="inv-subtotal">₹0.00</span>
+                </div>
+                <div class="flex justify-between text-taupe">
+                    <span>Shipping</span>
+                    <span id="inv-shipping">₹0.00</span>
+                </div>
+                <div class="flex justify-between text-base font-bold text-charcoal pt-2 border-t border-sand">
+                    <span>Total Amount</span>
+                    <span id="inv-total">₹0.00</span>
+                </div>
+            </div>
+
+            <div id="invoice-actions" class="flex flex-wrap items-center justify-end gap-3 pt-2">
+                <button type="button" onclick="window.print()" class="px-5 py-2.5 rounded-full bg-beige hover:bg-sand text-charcoal text-sm font-semibold">
+                    Print / Save Invoice
+                </button>
+                <button type="button" onclick="closeInvoiceModal()" class="px-6 py-2.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-cream text-sm font-semibold">
+                    Done
+                </button>
             </div>
         </div>
     </div>
@@ -448,8 +546,8 @@
             {
                 id: 5,
                 name: "Mini Charm & Keychain Trio",
-                category: "keychains",
-                categoryLabel: "Keychains",
+                category: "accessories",
+                categoryLabel: "Accessories",
                 price: 650,
                 fiber: "Fine Yarn & Beaded Accents",
                 badge: "Limited",
@@ -463,7 +561,7 @@
         let currentCategory = 'all';
 
         function normalizeProduct(raw) {
-            const cat = (raw.category || 'custom').toLowerCase();
+            const cat = (raw.category || 'accessories').toLowerCase();
             return {
                 id: raw.id,
                 name: raw.name,
@@ -486,9 +584,7 @@
                         products = data.map(normalizeProduct);
                     }
                 }
-            } catch (_) {
-                // Keep fallback catalog when viewing standalone HTML without backend
-            }
+            } catch (_) {}
             renderProducts(currentCategory);
         }
 
@@ -519,9 +615,10 @@
                             alt="${product.name}"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         >
+                        ${product.badge ? `
                         <span class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full bg-cream/90 backdrop-blur-xs text-xs font-semibold text-charcoal shadow-xs">
                             ${product.badge}
-                        </span>
+                        </span>` : ''}
                     </div>
 
                     <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
@@ -600,13 +697,19 @@
             const badge = document.getElementById('cart-badge');
             const container = document.getElementById('cart-items-container');
             const subtotalEl = document.getElementById('cart-subtotal');
+            const shippingEl = document.getElementById('cart-shipping');
+            const totalEl = document.getElementById('cart-total');
             const footer = document.getElementById('cart-footer');
 
             const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const shipping = subtotal === 0 || subtotal >= 2500 ? 0 : 80;
+            const total = subtotal + shipping;
 
             badge.textContent = totalItems;
             subtotalEl.textContent = `₹${subtotal.toFixed(2)}`;
+            shippingEl.textContent = `₹${shipping.toFixed(2)}`;
+            totalEl.textContent = `₹${total.toFixed(2)}`;
 
             if (cart.length === 0) {
                 footer.classList.add('hidden');
@@ -617,7 +720,7 @@
                         </div>
                         <div class="space-y-1">
                             <p class="font-serif text-lg font-semibold text-charcoal">Your basket is empty</p>
-                            <p class="text-xs text-taupe max-w-xs">Explore our handmade blankets, amigurumi, and wearables to add something cozy.</p>
+                            <p class="text-xs text-taupe max-w-xs">Explore our handmade blankets, keychains, and wearables to add something cozy.</p>
                         </div>
                         <button type="button" onclick="toggleCart()" class="px-5 py-2.5 rounded-full bg-terracotta text-cream text-xs font-semibold">
                             Browse Collection
@@ -658,6 +761,35 @@
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
+        }
+
+        function openInvoiceModal(inv) {
+            document.getElementById('inv-number-date').textContent = `Invoice #${inv.invoice_number} · ${inv.created_at}`;
+            document.getElementById('inv-status').textContent = inv.order_status;
+            document.getElementById('inv-customer-name').textContent = inv.customer_name;
+            document.getElementById('inv-customer-contact').textContent = `${inv.email} · ${inv.phone}`;
+            document.getElementById('inv-customer-address').textContent = inv.address;
+            document.getElementById('inv-payment-method').textContent = `Method: ${inv.payment_method}`;
+            document.getElementById('inv-payment-ref').textContent = `Payment Ref / UTR: ${inv.payment_reference}`;
+
+            document.getElementById('inv-items-body').innerHTML = (inv.items || []).map(row => `
+                <tr>
+                    <td class="p-3 font-medium text-charcoal">${row.name}</td>
+                    <td class="p-3">${row.qty}</td>
+                    <td class="p-3">₹${Number(row.price).toFixed(2)}</td>
+                    <td class="p-3 text-right font-semibold">₹${Number(row.line_total).toFixed(2)}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('inv-subtotal').textContent = `₹${Number(inv.subtotal || 0).toFixed(2)}`;
+            document.getElementById('inv-shipping').textContent = `₹${Number(inv.shipping_fee || 0).toFixed(2)}`;
+            document.getElementById('inv-total').textContent = `₹${Number(inv.total || 0).toFixed(2)}`;
+
+            document.getElementById('invoice-modal').classList.remove('hidden');
+        }
+
+        function closeInvoiceModal() {
+            document.getElementById('invoice-modal').classList.add('hidden');
         }
 
         function selectSwatch(btn, paletteName) {
@@ -707,11 +839,12 @@
         async function submitBasketOrder(e) {
             e.preventDefault();
             const form = e.target;
-            const email = document.getElementById('checkout-email').value;
-            const nameInput = document.getElementById('checkout-name');
-            const customerName = nameInput && nameInput.value.trim() ? nameInput.value.trim() : email.split('@')[0];
+            const customerName = document.getElementById('checkout-name').value.trim();
+            const email = document.getElementById('checkout-email').value.trim();
+            const phone = document.getElementById('checkout-phone').value.trim();
+            const address = document.getElementById('checkout-address').value.trim();
+            const paymentRef = document.getElementById('checkout-payment-ref').value.trim();
 
-            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const simplifiedItems = cart.map(item => ({
                 id: item.id,
                 name: item.name,
@@ -726,8 +859,11 @@
                     body: JSON.stringify({
                         name: customerName,
                         email,
-                        items: simplifiedItems,
-                        total: subtotal
+                        phone,
+                        address,
+                        payment_method: 'UPI',
+                        payment_reference: paymentRef,
+                        items: simplifiedItems
                     })
                 });
 
@@ -736,8 +872,9 @@
                     cart = [];
                     updateCartUI();
                     toggleCart();
-                    showToast(`Order #${result.order_id} confirmed for ${email}!`);
                     form.reset();
+                    openInvoiceModal(result);
+                    showToast(`Order #${result.order_id} placed! Invoice ready.`);
                 } else {
                     showToast(result.error || 'Could not place order.');
                 }
