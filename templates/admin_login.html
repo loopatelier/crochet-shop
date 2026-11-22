@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin Login | The Loop Atelier</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,21 +13,27 @@
     <div class="w-14 h-14 rounded-full bg-[#C86D51] text-white grid place-items-center text-2xl mx-auto">🧶</div>
     <h1 class="serif text-3xl font-semibold text-center mt-4">The Loop Atelier</h1>
     <p class="text-center text-sm text-[#6E6259] mt-1">Studio administration</p>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, message in messages %}
         <div class="mt-4 p-3 rounded-xl text-sm {{ 'bg-red-50 text-red-700' if category == 'error' else 'bg-green-50 text-green-700' }}">{{ message }}</div>
       {% endfor %}
     {% endwith %}
-    <form method="post" class="mt-7 space-y-4">
-      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+    <form method="post" action="{{ url_for('admin_login') }}" class="mt-7 space-y-4">
+      {% if csrf_token is defined %}
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      {% endif %}
       <label class="block text-sm font-semibold">Admin email
         <input name="email" type="email" required autocomplete="username" class="mt-2 w-full rounded-xl border border-[#E4D8C8] bg-[#FAF6F0] px-4 py-3 outline-none focus:border-[#C86D51]">
       </label>
       <label class="block text-sm font-semibold">Password
         <input name="password" type="password" required autocomplete="current-password" class="mt-2 w-full rounded-xl border border-[#E4D8C8] bg-[#FAF6F0] px-4 py-3 outline-none focus:border-[#C86D51]">
       </label>
-      <button class="w-full rounded-full bg-[#C86D51] hover:bg-[#B35B40] text-white font-semibold py-3">Sign in to dashboard</button>
+      <button type="submit" class="w-full rounded-full bg-[#C86D51] hover:bg-[#B35B40] text-white font-semibold py-3">Sign in to dashboard</button>
     </form>
-    <a href="/" class="block text-center text-sm text-[#6E6259] hover:text-[#C86D51] mt-6">← Back to shop</a>
+
+    <a href="{{ url_for('index') }}" class="block text-center text-sm text-[#6E6259] hover:text-[#C86D51] mt-6">← Back to shop</a>
   </main>
-</body></html>
+</body>
+</html>
