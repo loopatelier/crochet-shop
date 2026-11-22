@@ -217,6 +217,20 @@
             <p class="text-[11px] text-[#7A6F66] mt-1.5">Opens your UPI app on mobile • Then enter UTR below</p>
           </div>
 
+          <div>
+            <label class="block text-xs font-semibold text-[#7A6F66] mb-1">3. Enter UPI UTR / Transaction ID *</label>
+            <input
+              type="text"
+              id="ord-utr"
+              required
+              minlength="8"
+              maxlength="24"
+              pattern="[A-Za-z0-9]{8,24}"
+              placeholder="e.g. 432819045612"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]"
+            />
+            <p class="text-[11px] text-[#7A6F66] mt-1">Enter the transaction/UTR ID from your UPI app after paying.</p>
+          </div>
 
           <label class="flex items-start gap-2.5 text-xs text-[#2B2420] bg-[#F6F1EA] border border-[#E6DDD1] rounded-xl p-3 cursor-pointer">
             <input type="checkbox" id="ord-paid-confirm" class="mt-0.5 rounded border-[#D4C7B8] text-[#A65D47]" />

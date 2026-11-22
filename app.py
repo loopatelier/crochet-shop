@@ -165,6 +165,9 @@ def create_order():
     if not customer_name or not phone or not address or not utr:
         return jsonify({"success": False, "error": "Please fill in all required fields."}), 400
 
+    if not re.fullmatch(r"[A-Za-z0-9]{8,24}", utr):
+        return jsonify({"success": False, "error": "Please enter a valid UPI UTR / transaction ID (8–24 letters/numbers)."}), 400
+
     if not isinstance(items, list) or len(items) == 0:
         return jsonify({"success": False, "error": "Your basket is empty."}), 400
 
