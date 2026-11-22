@@ -195,16 +195,16 @@
     </section>
   </div>
 
-  <!-- Basket drawer -->
+  <<!-- Basket drawer -->
   <div id="cart-modal" class="fixed inset-0 z-50 hidden">
     <div onclick="toggleCart()" class="absolute inset-0 bg-charcoal/55 backdrop-blur-sm"></div>
-    <aside class="absolute right-0 top-0 h-full w-full max-w-md bg-cream shadow-2xl flex flex-col">
-      <div class="p-5 border-b border-sand flex justify-between items-center bg-beige/60">
+    <aside class="absolute right-0 top-0 h-full w-full max-w-md bg-cream shadow-2xl flex flex-col overflow-y-auto overscroll-contain">
+      <div class="p-5 border-b border-sand flex justify-between items-center bg-beige/60 shrink-0 sticky top-0 z-10">
         <h3 class="font-serif text-xl font-semibold flex items-center gap-2"><i data-lucide="shopping-bag" class="text-terracotta"></i>Your Yarn Basket</h3>
         <button onclick="toggleCart()" class="p-2 rounded-full hover:bg-sand" aria-label="Close basket"><i data-lucide="x"></i></button>
       </div>
-      <div id="cart-items-container" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
-      <div id="cart-footer" class="hidden p-5 border-t border-sand bg-beige/50 space-y-4">
+      <div id="cart-items-container" class="p-5 space-y-3 shrink-0"></div>
+      <div id="cart-footer" class="hidden p-5 border-t border-sand bg-beige/50 space-y-4 shrink-0">
         <div class="flex justify-between text-sm"><span class="text-taupe">Subtotal</span><strong id="cart-subtotal">₹0.00</strong></div>
         <p class="text-xs text-taupe">Final delivery charges, if any, will be confirmed by the studio.</p>
         <form onsubmit="submitBasketOrder(event)" class="space-y-3">
@@ -216,14 +216,14 @@
             <p class="font-semibold text-sm">UPI payment only</p>
             <img id="checkout-qr" class="hidden mx-auto max-h-48 rounded-xl object-contain" alt="Studio UPI payment QR code">
             <p id="qr-unavailable" class="text-xs text-taupe">The studio's UPI QR code has not been uploaded yet. Please contact the studio before paying.</p>
-            <p class="text-xs text-taupe">Scan the QR code to pay. After placing your order, the studio will contact you to confirm the payment.</p>
+            <input id="payment-reference" placeholder="UPI transaction ID / UTR (after payment)" class="form-input">
+            <p class="text-xs text-taupe">Scan the QR code, pay the displayed order total, then enter your UPI transaction reference.</p>
           </div>
           <button id="checkout-submit" type="submit" class="w-full py-3.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-white font-semibold text-sm">Place UPI Order</button>
         </form>
       </div>
     </aside>
   </div>
-
   <style>
     .form-input{width:100%;padding:12px 15px;border-radius:12px;background:#F3ECE3;border:1px solid #E4D8C8;outline:none;font-size:14px;color:#3A322D}
     .form-input:focus{border-color:#C86D51;box-shadow:0 0 0 3px #C86D5125}
