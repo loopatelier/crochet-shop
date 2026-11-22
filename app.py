@@ -88,6 +88,7 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(160), nullable=False)
+    customer_email = db.Column(db.String(160), nullable=False, default="")
     phone = db.Column(db.String(30), nullable=False, default="")
     address = db.Column(db.Text, nullable=False, default="")
     payment_method = db.Column(db.String(30), nullable=False, default="UPI")
@@ -302,16 +303,17 @@ def create_order():
 
     try:
         order = Order(
-            customer_name=name,
-            email=email,
-            phone=phone,
-            address=address,
-            payment_method="UPI",
-            payment_reference=payment_reference,
-            total=0,
-            status="Pending",
-            created_at=datetime.utcnow(),
-        )
+    customer_name=name,
+    email=email,
+    customer_email=email,
+    phone=phone,
+    address=address,
+    payment_method="UPI",
+    payment_reference=payment_reference,
+    total=0,
+    status="Pending",
+    created_at=datetime.utcnow(),
+)
         calculated_total = 0.0
         for row in items:
             product_id = int(row.get("id"))
