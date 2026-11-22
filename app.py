@@ -127,18 +127,18 @@ with app.app_context():
                 price=100,
                 stock=3,
                 visible=True,
-                image_url="https://images.unsplash.com/photo-1618842676088-c4d48a6a7c9d?auto=format&fit=crop&w=800&q=80",
-                description="Plush, ultra-soft handmade companion crocheted in plush velvet yarn."
+                image_url="/static/cro4.jpeg",
+                description="Red heart keychain."
             ),
             Product(
-                name="Botanical Daisy Book Sleeve",
+                name="Octopus",
                 subtitle="Padded Cotton Yarn",
-                category="Book & Pet Accessories",
-                price=520,
+                category="Amigurumi & Key Charms",
+                price=70,
                 stock=5,
                 visible=True,
-                image_url="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80",
-                description="Cushioned crochet sleeve with a wooden button closure to keep paperbacks safe."
+                image_url="/static/cro5.jpeg",
+                description="A tiny blue baby octopus keycahin soft& cute."
             )
         ]
         db.session.bulk_save_objects(sample_products)
