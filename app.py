@@ -62,7 +62,6 @@ class StoreSettings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     admin_email = db.Column(db.String(120), default="admin@loopatelier.com")
     password_hash = db.Column(db.String(256), nullable=False)
-    upi_id = db.Column(db.String(120), default="ayesha@upi")
     upi_name = db.Column(db.String(120), default="Ayesha")
     qr_image_url = db.Column(db.String(300), default="/static/upi_qr.jpeg")
     shipping_fee = db.Column(db.Float, default=70.0)
@@ -91,7 +90,6 @@ with app.app_context():
         default_settings = StoreSettings(
             admin_email="admin@loopatelier.com",
             password_hash=generate_password_hash("atelier2026"),
-            upi_id="ayesha@upi",
             upi_name="Ayesha",
             qr_image_url="/static/upi_qr.jpeg",
             shipping_fee=70.0,
@@ -166,9 +164,6 @@ def create_order():
 
     if not customer_name or not phone or not address or not utr:
         return jsonify({"success": False, "error": "Please fill in all required fields."}), 400
-
-    if not re.fullmatch(r"[A-Za-z0-9]{8,24}", utr):
-        return jsonify({"success": False, "error": "Please enter a valid UPI UTR / transaction ID (8–24 letters/numbers)."}), 400
 
     if not isinstance(items, list) or len(items) == 0:
         return jsonify({"success": False, "error": "Your basket is empty."}), 400
@@ -336,9 +331,6 @@ def update_order_status(order_id):
 @admin_required
 def update_settings():
     settings = StoreSettings.query.first()
-    upi_id_val = (request.form.get("upi_id") or "").strip()
-    if upi_id_val:
-        settings.upi_id = upi_id_val
     settings.upi_name = request.form.get("upi_name", settings.upi_name).strip()
     settings.shipping_fee = float(request.form.get("shipping_fee", settings.shipping_fee))
     settings.free_shipping_above = float(request.form.get("free_shipping_above", settings.free_shipping_above))
