@@ -86,16 +86,13 @@
         <div id="pd-thumbs" class="grid grid-cols-4 gap-3 mt-3"></div>
       </div>
 
-      <!-- Right: Product Info, Quantity, Add to Basket, Wishlist & Reviews -->
+      <!-- Right: Product Info, Quantity, Add to Basket & Wishlist -->
       <div class="pt-1">
         <p id="pd-category" class="text-xs uppercase tracking-[0.16em] text-[#7A6F66] font-semibold"></p>
         <h1 id="pd-name" class="serif text-3xl sm:text-4xl text-[#2B2420] mt-1.5 leading-tight"></h1>
 
         <div class="flex items-center gap-3 mt-3">
           <span id="pd-price" class="text-2xl sm:text-3xl font-bold text-[#2B2420]"></span>
-          <span class="inline-flex items-center gap-1 text-sm font-medium text-[#7A6F66]">
-            <span class="text-amber-500">★</span> <span id="pd-rating-inline">4.9</span>
-          </span>
         </div>
 
         <div class="mt-3 flex flex-wrap items-center gap-2">
@@ -131,6 +128,8 @@
             <span id="pd-wishlist-text">Wishlist</span>
           </button>
         </div>
+      </div>
+    </div>
   </section>
 
   <!-- ========================================================= -->
@@ -153,7 +152,7 @@
         </div>
         <div class="flex flex-wrap gap-6 mt-10 pt-6 border-t border-[#E6DDD1] text-xs text-[#7A6F66]">
           <span>🤍 100% Handmade</span>
-          <span>⭐ 4.9★ Customer Love</span>
+          <span>🧶 Slow-Crafted Small Batches</span>
           <span>📦 Safe &amp; Careful Packaging</span>
         </div>
       </div>
@@ -213,7 +212,7 @@
     <section id="shop" class="max-w-6xl mx-auto px-6 py-12">
       <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
-          <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Curated &amp; Trending Pieces</span>
+          <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Curated Pieces</span>
           <h2 class="serif text-4xl mt-1">Handmade Collection</h2>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -242,18 +241,12 @@
           <div>
             <div class="aspect-square overflow-hidden bg-[#EFE8DD] relative">
               <img src="{{ p.image_url }}" alt="{{ p.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-              {% if loop.index <= 2 %}
-              <span class="absolute top-3 right-3 px-3 py-1 rounded-full bg-[#FDFBF8]/95 border border-[#E6DDD1] text-[#2B2420] text-[11px] font-semibold">⭐ Best Seller</span>
-              {% endif %}
               {% if p.stock is defined and p.stock <= 0 %}
               <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#2B2420] text-white text-xs">Made to Order</span>
               {% endif %}
             </div>
             <div class="p-5">
-              <div class="flex items-center justify-between gap-2">
-                <p class="text-[11px] uppercase tracking-wider text-[#A65D47] font-semibold">{{ p.category }}</p>
-                <span class="text-[11px] text-[#7A6F66] font-medium">4.9 ★</span>
-              </div>
+              <p class="text-[11px] uppercase tracking-wider text-[#A65D47] font-semibold">{{ p.category }}</p>
               <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">{{ p.name }}</h3>
               {% if p.subtitle is defined and p.subtitle %}
               <p class="text-xs text-[#7A6F66] mt-0.5">{{ p.subtitle }}</p>
@@ -514,12 +507,6 @@
     let activeGalleryIndex = 0;
     let detailQty = 1;
 
-    const SAMPLE_REVIEWS = [
-      { author: 'Ananya R.', rating: 5, text: 'The yarn quality and neatness of every single stitch is unreal! Looked even prettier in person.' },
-      { author: 'Meera K.', rating: 5, text: 'Ordered as a gift and the packaging felt so personal and thoughtful. Totally worth it.' },
-      { author: 'Riya S.', rating: 4, text: 'Super cute and sturdy handmade piece. Will definitely order more colors soon!' }
-    ];
-
     const utrInput = document.getElementById('ord-utr');
     const paidCheckbox = document.getElementById('ord-paid-confirm');
     const confirmOrderBtn = document.getElementById('confirm-order-btn');
@@ -615,7 +602,6 @@
 
       renderGallery();
       syncWishlistButton();
-      renderDetailReviews();
 
       document.getElementById('storefront-main').classList.add('hidden');
       document.getElementById('product-detail-view').classList.remove('hidden');
@@ -695,20 +681,6 @@
       document.getElementById('pd-wishlist-icon').innerText = saved ? '♥' : '♡';
       document.getElementById('pd-wishlist-icon').classList.toggle('text-[#A65D47]', saved);
       document.getElementById('pd-wishlist-text').innerText = saved ? 'Saved in Wishlist' : 'Wishlist';
-    }
-
-    function renderDetailReviews() {
-      document.getElementById('pd-review-score').innerText = '4.9';
-      document.getElementById('pd-review-count').innerText = `${SAMPLE_REVIEWS.length} reviews`;
-      document.getElementById('pd-reviews-list').innerHTML = SAMPLE_REVIEWS.map(r => `
-        <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-4">
-          <div class="flex items-center justify-between">
-            <p class="text-xs font-semibold text-[#2B2420]">${r.author}</p>
-            <span class="text-amber-500 text-xs">${'★'.repeat(r.rating)}</span>
-          </div>
-          <p class="text-xs text-[#7A6F66] mt-1.5 leading-relaxed">${r.text}</p>
-        </div>
-      `).join('');
     }
 
     // --- CATEGORY & BASKET FUNCTIONS ---
