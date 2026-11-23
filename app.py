@@ -150,16 +150,105 @@ with app.app_context():
                 description="Red heart keychain."
             ),
             Product(
-                name="Octopus",
-                subtitle="Padded Cotton Yarn",
-                category="Amigurumi & Key Charms",
-                price=70,
+                name="Bouquet",
+                subtitle="Acrylic Yarn",
+                category="Bouquets & Bags",
+                price=1200,
                 stock=5,
                 visible=True,
-                image_url="/static/cro5.jpeg",
+                image_url="/static/cro6.jpeg",
                 gallery_images_json="[]",
-                description="A tiny blue baby octopus keycahin soft& cute."
+                description="A lilac lilly bouquet ."
+            ),
+            Product(
+                name="F1 Keychain",
+                subtitle="Acrylic Yarn",
+                category="Amigurumi & Key Charms",
+                price=100,
+                stock=5,
+                visible=True,
+                image_url="/static/f1.jpeg",
+                gallery_images_json="[]",
+                description="F1 kechain with tassel."
+            ),
+            Product(
+                name="Letter keychain",
+                subtitle="Acrylic Yarn",
+                category="Amigurumi & Key Charms",
+                price=130,
+                stock=5,
+                visible=True,
+                image_url="/static/letter.jpeg",
+                gallery_images_json="[]",
+                description="A letter and kitty keychain set with pearls."
+            ),
+             Product(
+                name="Rose Bag",
+                subtitle="Acrylic Yarn",
+                category="Bouquets & Bags",
+                price=1299,
+                stock=5,
+                visible=True,
+                image_url="/static/rose1.jpeg",
+                gallery_images_json="[/static/rose2.jpeg]",
+                description="A deep red rose bag with a pearl strap."
+            ),
+             Product(
+                name="Hanging Spiderman ",
+                subtitle="Acrylic Yarn",
+                category="Amigurumi & Key Charms",
+                price=175,
+                stock=5,
+                visible=True,
+                image_url="/static/spiderman.jpeg",
+                gallery_images_json="[]",
+                description="A tiny spider hero plush."
+            ),
+             Product(
+                name="Frog pet hat",
+                subtitle="Acrylic Yarn",
+                category="Book & Pet Accessories",
+                price=230,
+                stock=5,
+                visible=True,
+                image_url="/static/cat0.1.jpeg",
+                gallery_images_json="[/static/cat0.jpeg]",
+                description="A green frog hat for pets."
+            ),
+            Product(
+                name="Strawberry pet hat",
+                subtitle="Acrylic Yarn",
+                category="Book & Pet Accessories",
+                price=230,
+                stock=5,
+                visible=True,
+                image_url="/static/cat1.0.jpeg",
+                gallery_images_json="[/static/cat1.jpeg]",
+                description="A red strawberry hat for pets."
+            ),
+            Product(
+                name="Pink pet hat",
+                subtitle="Acrylic Yarn",
+                category="Book & Pet Accessories",
+                price=120,
+                stock=5,
+                visible=True,
+                image_url="/static/cat2.0.jpeg",
+                gallery_images_json="[/static/cat2.jpeg]",
+                description="A pink flower hat for pets."
+            ),
+            Product(
+                name="Book cover with book mark",
+                subtitle="Acrylic Yarn",
+                category="Book & Pet Accessories",
+                price=450,
+                stock=2,
+                visible=True,
+                image_url="/static/cover0.jpeg",
+                gallery_images_json="[/static/cover1.jpeg]",
+                description="A brown book cover with white daisies."
             )
+
         ]
         db.session.bulk_save_objects(sample_products)
         db.session.commit()
