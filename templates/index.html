@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* Keep exact background unchanged */
     body { background: #F6F1EA; color: #2B2420; font-family: 'Plus Jakarta Sans', sans-serif; }
     .serif { font-family: 'Fraunces', serif; }
     @media print {
@@ -20,9 +21,15 @@
 {% set qr_src = s.qr_image_url if (s.qr_image_url is defined and s.qr_image_url) else '/static/upi_qr.jpeg' %}
 <body
   data-shipping-fee="{{ s.shipping_fee if s.shipping_fee is defined else 70 }}"
-  data-free-shipping-above="{{ s.free_shipping_above if s.free_shipping_above is defined else 1200 }}"
+  data-free-shipping-above="{{ s.free_shipping_above if s.free_shipping_above is defined else 999 }}"
   data-upi-name="{{ s.upi_name if s.upi_name is defined else 'Ayesha' }}"
+  data-upi-id="{{ s.upi_id if s.upi_id is defined else 'theloopatelier@upi' }}"
 >
+  <!-- Top Announcement Strip -->
+  <div class="bg-[#2B2420] text-[#F6F1EA] text-[11px] sm:text-xs py-2 px-4 text-center tracking-wide">
+    <span>✨ Handmade with Love, Woven with Memories • Free shipping above ₹{{ "%.0f"|format(s.free_shipping_above if s.free_shipping_above is defined else 999) }} • Made to order in 3–5 days</span>
+  </div>
+
   <!-- Navbar (Customer Only — No Admin Link) -->
   <header class="sticky top-0 z-40 bg-[#F6F1EA]/90 backdrop-blur-md border-b border-[#E6DDD1]">
     <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -31,7 +38,8 @@
         <span class="serif text-xl font-semibold">The Loop Atelier</span>
       </a>
       <nav class="hidden md:flex items-center gap-8 text-sm text-[#7A6F66]">
-        <a href="#shop" class="hover:text-[#2B2420]">Shop Collection</a>
+        <a href="#corners" class="hover:text-[#2B2420]">Collections</a>
+        <a href="#shop" class="hover:text-[#2B2420]">Shop All</a>
         <a href="#story" class="hover:text-[#2B2420]">Our Story</a>
         <a href="#custom" class="hover:text-[#2B2420]">Custom Orders</a>
       </nav>
@@ -43,23 +51,23 @@
   </header>
 
   <!-- Hero Section -->
-  <section class="max-w-6xl mx-auto px-6 py-14 md:py-20 grid md:grid-cols-2 gap-12 items-center">
+  <section class="max-w-6xl mx-auto px-6 py-12 md:py-18 grid md:grid-cols-2 gap-12 items-center">
     <div>
-      <span class="inline-block text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold mb-4">🧶 Slow-Made With 100% Natural Fibers</span>
+      <span class="inline-block text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold mb-4">🧶 A Little Studio of Yarn &amp; Patience</span>
       <h1 class="serif text-5xl md:text-6xl leading-[1.08] font-normal">
-        Stitched with warmth, crafted to be <em class="text-[#A65D47]">cherished.</em>
+        Handmade with love, woven with <em class="text-[#A65D47]">memories.</em>
       </h1>
       <p class="text-[#7A6F66] mt-5 leading-relaxed max-w-md">
-        Welcome to The Loop Atelier (<span class="text-[#2B2420] font-medium">@the_loop.atelier</span>). Every little treasure is thoughtfully crocheted by hand, just for you. No machines, no rush — only love in every loop.
+        Welcome to The Loop Atelier (<span class="text-[#2B2420] font-medium">@the_loop.atelier</span>). Every bouquet, bag, charm, and keepsake is looped by hand, one stitch at a time — never mass-produced, never in a hurry.
       </p>
       <div class="flex flex-wrap gap-3 mt-8">
-        <a href="#shop" class="px-7 py-3.5 rounded-full bg-[#A65D47] text-white text-sm font-medium hover:bg-[#8E4C38] transition">Explore the Collection</a>
-        <a href="#custom" class="px-7 py-3.5 rounded-full border border-[#D4C7B8] bg-[#FDFBF8] text-sm font-medium hover:border-[#A65D47] transition">Customize Your Own</a>
+        <a href="#shop" class="px-7 py-3.5 rounded-full bg-[#A65D47] text-white text-sm font-medium hover:bg-[#8E4C38] transition">Shop Now</a>
+        <a href="#custom" class="px-7 py-3.5 rounded-full border border-[#D4C7B8] bg-[#FDFBF8] text-sm font-medium hover:border-[#A65D47] transition">Custom Request</a>
       </div>
       <div class="flex flex-wrap gap-6 mt-10 pt-6 border-t border-[#E6DDD1] text-xs text-[#7A6F66]">
         <span>🤍 100% Handmade</span>
-        <span>✨ Made With Love</span>
-        <span>📦 Ships With Care</span>
+        <span>⭐ 4.9★ Customer Love</span>
+        <span>📦 Safe &amp; Careful Packaging</span>
       </div>
     </div>
 
@@ -77,19 +85,56 @@
     </div>
   </section>
 
+  <!-- Find Your Favourite Corner (Collection Cards) -->
+  <section id="corners" class="max-w-6xl mx-auto px-6 py-10">
+    <div class="flex items-end justify-between gap-4 mb-6">
+      <div>
+        <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Explore Collections</span>
+        <h2 class="serif text-3xl md:text-4xl mt-1">Find Your Favourite Corner</h2>
+      </div>
+      <a href="#shop" onclick="selectCategoryByName('All')" class="text-xs font-semibold text-[#A65D47] hover:underline">View All Pieces →</a>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <button type="button" onclick="selectCategoryByName('Bouquets & Bags')" class="text-left bg-[#FDFBF8] border border-[#E6DDD1] hover:border-[#A65D47] rounded-2xl p-5 transition group">
+        <p class="text-xs font-semibold text-[#A65D47]">💐 Blooms &amp; Totes</p>
+        <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">Bouquets &amp; Bags</h3>
+        <p class="text-xs text-[#7A6F66] mt-1">Everlasting flower bouquets, slings &amp; totes.</p>
+      </button>
+
+      <button type="button" onclick="selectCategoryByName('Wearables & Keepsakes')" class="text-left bg-[#FDFBF8] border border-[#E6DDD1] hover:border-[#A65D47] rounded-2xl p-5 transition group">
+        <p class="text-xs font-semibold text-[#A65D47]">🎀 Tops &amp; Hair Edits</p>
+        <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">Wearables &amp; Keepsakes</h3>
+        <p class="text-xs text-[#7A6F66] mt-1">Crochet tops, hair clips, ties &amp; headbands.</p>
+      </button>
+
+      <button type="button" onclick="selectCategoryByName('Amigurumi & Key Charms')" class="text-left bg-[#FDFBF8] border border-[#E6DDD1] hover:border-[#A65D47] rounded-2xl p-5 transition group">
+        <p class="text-xs font-semibold text-[#A65D47]">🧸 Cute Charms</p>
+        <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">Amigurumi &amp; Key Charms</h3>
+        <p class="text-xs text-[#7A6F66] mt-1">Bag charms, plushies &amp; pocket keychains.</p>
+      </button>
+
+      <button type="button" onclick="selectCategoryByName('Book & Pet Accessories')" class="text-left bg-[#FDFBF8] border border-[#E6DDD1] hover:border-[#A65D47] rounded-2xl p-5 transition group">
+        <p class="text-xs font-semibold text-[#A65D47]">📖 Cozy Extras</p>
+        <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">Book &amp; Pet Accessories</h3>
+        <p class="text-xs text-[#7A6F66] mt-1">Thoughtful bookmarks &amp; handmade accents.</p>
+      </button>
+    </div>
+  </section>
+
   <!-- Shop Collection -->
-  <section id="shop" class="max-w-6xl mx-auto px-6 py-14">
+  <section id="shop" class="max-w-6xl mx-auto px-6 py-12">
     <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
       <div>
-        <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Curated Pieces</span>
+        <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Curated &amp; Trending Pieces</span>
         <h2 class="serif text-4xl mt-1">Handmade Collection</h2>
       </div>
       <div class="flex flex-wrap gap-2">
-        <button type="button" onclick="filterCategory('All', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#2B2420] text-white">All</button>
-        <button type="button" onclick="filterCategory('Wearables & Keepsakes', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Wearables &amp; Keepsakes</button>
-        <button type="button" onclick="filterCategory('Amigurumi & Key Charms', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Amigurumi &amp; Key Charms</button>
-        <button type="button" onclick="filterCategory('Bouquets & Bags', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Bouquets &amp; Bags</button>
-        <button type="button" onclick="filterCategory('Book & Pet Accessories', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Book &amp; Pet Accessories</button>
+        <button type="button" data-cat="All" onclick="filterCategory('All', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#2B2420] text-white">All</button>
+        <button type="button" data-cat="Wearables & Keepsakes" onclick="filterCategory('Wearables & Keepsakes', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Wearables &amp; Keepsakes</button>
+        <button type="button" data-cat="Amigurumi & Key Charms" onclick="filterCategory('Amigurumi & Key Charms', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Amigurumi &amp; Key Charms</button>
+        <button type="button" data-cat="Bouquets & Bags" onclick="filterCategory('Bouquets & Bags', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Bouquets &amp; Bags</button>
+        <button type="button" data-cat="Book & Pet Accessories" onclick="filterCategory('Book & Pet Accessories', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Book &amp; Pet Accessories</button>
       </div>
     </div>
 
@@ -99,12 +144,18 @@
         <div>
           <div class="aspect-square overflow-hidden bg-[#EFE8DD] relative">
             <img src="{{ p.image_url }}" alt="{{ p.name }}" class="w-full h-full object-cover hover:scale-105 transition duration-500" />
+            {% if loop.index <= 2 %}
+            <span class="absolute top-3 right-3 px-3 py-1 rounded-full bg-[#FDFBF8]/95 border border-[#E6DDD1] text-[#2B2420] text-[11px] font-semibold">⭐ Best Seller</span>
+            {% endif %}
             {% if p.stock is defined and p.stock <= 0 %}
             <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#2B2420] text-white text-xs">Made to Order</span>
             {% endif %}
           </div>
           <div class="p-5">
-            <p class="text-[11px] uppercase tracking-wider text-[#A65D47] font-semibold">{{ p.category }}</p>
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-[11px] uppercase tracking-wider text-[#A65D47] font-semibold">{{ p.category }}</p>
+              <span class="text-[11px] text-[#7A6F66] font-medium">4.9 ★</span>
+            </div>
             <h3 class="serif text-xl mt-1">{{ p.name }}</h3>
             {% if p.subtitle is defined and p.subtitle %}
             <p class="text-xs text-[#7A6F66] mt-0.5">{{ p.subtitle }}</p>
@@ -130,28 +181,64 @@
     </div>
   </section>
 
+  <!-- Your Crochet Journey (4-Step Process) -->
+  <section class="max-w-6xl mx-auto px-6 py-10">
+    <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl p-7 md:p-10">
+      <div class="text-center max-w-xl mx-auto mb-8">
+        <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">How It Works</span>
+        <h2 class="serif text-3xl mt-1">Your Crochet Journey</h2>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 text-sm">
+        <div class="bg-[#F6F1EA] border border-[#E6DDD1] rounded-2xl p-5">
+          <span class="text-xs font-bold text-[#A65D47]">01 • DREAM IT</span>
+          <h3 class="serif text-lg mt-1">Pick or Pitch</h3>
+          <p class="text-xs text-[#7A6F66] mt-1">Choose a ready design or share your inspiration photo and colors.</p>
+        </div>
+        <div class="bg-[#F6F1EA] border border-[#E6DDD1] rounded-2xl p-5">
+          <span class="text-xs font-bold text-[#A65D47]">02 • WE CREATE IT</span>
+          <h3 class="serif text-lg mt-1">Stitched by Hand</h3>
+          <p class="text-xs text-[#7A6F66] mt-1">Crafted carefully from scratch in small batches with cozy yarn.</p>
+        </div>
+        <div class="bg-[#F6F1EA] border border-[#E6DDD1] rounded-2xl p-5">
+          <span class="text-xs font-bold text-[#A65D47]">03 • WE WRAP IT</span>
+          <h3 class="serif text-lg mt-1">Packed with Care</h3>
+          <p class="text-xs text-[#7A6F66] mt-1">Wrapped neatly so delicate flowers, bags, and charms arrive safely.</p>
+        </div>
+        <div class="bg-[#F6F1EA] border border-[#E6DDD1] rounded-2xl p-5">
+          <span class="text-xs font-bold text-[#A65D47]">04 • YOU TREASURE IT</span>
+          <h3 class="serif text-lg mt-1">Keepsake Joy</h3>
+          <p class="text-xs text-[#7A6F66] mt-1">A thoughtful gift or everyday accessory made to be cherished.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Our Story -->
-  <section id="story" class="max-w-4xl mx-auto px-6 py-14 text-center">
+  <section id="story" class="max-w-4xl mx-auto px-6 py-12 text-center">
     <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl p-8 md:p-12">
       <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Slow Craftsmanship</span>
       <h2 class="serif text-3xl md:text-4xl mt-2">Every stitch tells a story</h2>
       <p class="text-sm text-[#7A6F66] mt-4 leading-relaxed">
-        Born out of a love for tactile yarn art and cozy keepsakes, <strong class="text-[#2B2420]">@the_loop.atelier</strong> creates small-batch crochet pieces meant to last for years. Each bouquet, plushie, and tote is carefully handmade from scratch once you place your order.
+        Born out of a love for tactile yarn art and cozy keepsakes, <strong class="text-[#2B2420]">@the_loop.atelier</strong> creates small-batch crochet pieces meant to last for years. Each bouquet, bag, charm, and wearable is carefully handmade from scratch once you place your order.
       </p>
     </div>
   </section>
 
-  <!-- Custom Commission Form -->
+  <!-- Custom Commission Form (With Reference Image Support) -->
   <section id="custom" class="max-w-3xl mx-auto px-6 py-12">
     <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl p-8">
-      <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Bespoke Orders</span>
+      <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Bespoke Orders • "Can You Make This?"</span>
       <h2 class="serif text-3xl mt-1">Customize Your Own Piece</h2>
-      <p class="text-xs text-[#7A6F66] mt-1">Have a custom bouquet, amigurumi character, or color palette in mind? Send a request directly to the studio.</p>
-      <form onsubmit="submitCustomInquiry(event)" class="grid sm:grid-cols-2 gap-4 mt-6 text-sm">
+      <p class="text-xs text-[#7A6F66] mt-1">Have a custom bouquet, bag, character charm, or reference photo in mind? Send a request directly to the studio.</p>
+      <form onsubmit="submitCustomInquiry(event)" enctype="multipart/form-data" class="grid sm:grid-cols-2 gap-4 mt-6 text-sm">
         <input type="text" id="cust-name" required placeholder="Your Name" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
         <input type="text" id="cust-contact" required placeholder="WhatsApp Number or @Instagram" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
-        <input type="text" id="cust-type" required placeholder="Item Idea (e.g. Lily Bouquet, Cat Hat)" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+        <input type="text" id="cust-type" required placeholder="Item Idea (e.g. Rose Tote, Bouquet Charm)" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
         <input type="text" id="cust-colors" placeholder="Preferred Colors (e.g. Sage &amp; Cream)" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+        <div class="sm:col-span-2 px-4 py-3 rounded-xl bg-[#F6F1EA] border border-dashed border-[#D4C7B8]">
+          <label for="cust-ref-image" class="block text-xs font-semibold text-[#2B2420] mb-1">Reference Image (Optional — JPG, PNG or WEBP)</label>
+          <input type="file" id="cust-ref-image" accept="image/jpeg,image/png,image/webp" class="w-full text-xs text-[#7A6F66]" />
+        </div>
         <textarea id="cust-notes" rows="2" placeholder="Size, deadline, or extra details..." class="sm:col-span-2 px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]"></textarea>
         <button type="submit" class="sm:col-span-2 py-3.5 rounded-full bg-[#A65D47] text-white font-medium hover:bg-[#8E4C38]">Send Custom Request</button>
       </form>
@@ -160,9 +247,27 @@
   </section>
 
   <!-- Customer Footer (NO Admin Link) -->
-  <footer class="border-t border-[#E6DDD1] py-8 px-6 text-center text-xs text-[#7A6F66]">
-    <p class="serif text-base text-[#2B2420]">The Loop Atelier</p>
-    <p class="mt-1">Instagram: <a href="https://instagram.com/the_loop.atelier" target="_blank" rel="noopener noreferrer" class="text-[#A65D47] underline">@the_loop.atelier</a> • Handcrafted with love in India</p>
+  <footer class="border-t border-[#E6DDD1] py-10 px-6 text-xs text-[#7A6F66]">
+    <div class="max-w-6xl mx-auto grid sm:grid-cols-3 gap-8 text-center sm:text-left">
+      <div>
+        <p class="serif text-lg text-[#2B2420]">The Loop Atelier</p>
+        <p class="mt-1 leading-relaxed">Handcrafted crochet bouquets, bags, charms &amp; wearables made to order with care in India.</p>
+      </div>
+      <div>
+        <p class="font-semibold uppercase tracking-wider text-[#2B2420] text-[11px] mb-2">Quick Links</p>
+        <ul class="space-y-1.5">
+          <li><a href="#corners" class="hover:text-[#2B2420]">Collections</a></li>
+          <li><a href="#shop" class="hover:text-[#2B2420]">Shop Collection</a></li>
+          <li><a href="#custom" class="hover:text-[#2B2420]">Custom Orders</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-semibold uppercase tracking-wider text-[#2B2420] text-[11px] mb-2">Connect</p>
+        <p>Instagram: <a href="https://instagram.com/the_loop.atelier" target="_blank" rel="noopener noreferrer" class="text-[#A65D47] underline">@the_loop.atelier</a></p>
+        <p class="mt-1">Every piece is made to order — allow 3–5 days.</p>
+      </div>
+    </div>
+    <p class="text-center mt-8 pt-6 border-t border-[#E6DDD1]">&copy; 2026 The Loop Atelier • Handcrafted with love in India</p>
   </footer>
 
   <!-- SLIDE-OVER BASKET & UPI CHECKOUT DRAWER -->
@@ -203,7 +308,7 @@
             <h4 class="serif text-lg">2. Scan &amp; Pay via UPI</h4>
             <p class="text-xs text-[#7A6F66] mt-0.5">Pay exact amount: <strong id="upi-pay-amt" class="text-[#2B2420]">₹0</strong></p>
 
-            <img src="/static/upi_qr.jpeg" alt="PhonePe UPI QR Scanner" class="w-44 h-44 mx-auto my-3 rounded-xl bg-white p-2 border border-[#E6DDD1] object-contain" />
+            <img src="{{ qr_src }}" alt="UPI QR Scanner" class="w-44 h-44 mx-auto my-3 rounded-xl bg-white p-2 border border-[#E6DDD1] object-contain" />
 
             <p class="text-[11px] text-[#7A6F66]">(<span id="upi-name-label">{{ s.upi_name if s.upi_name is defined else 'Ayesha' }}</span>)</p>
 
@@ -214,8 +319,7 @@
             >
               📲 Open UPI Payment App
             </a>
-            <p class="text-[11px] text-[#7A6F66] mt-1.5">Take a screenshot of the scanner • Open your UPI app on mobile and scan 
-                                                                     • Then enter UTR/Transaction ID below</p>
+            <p class="text-[11px] text-[#7A6F66] mt-1.5">Scan the QR code or tap above on mobile • Then enter UTR/Transaction ID below</p>
           </div>
 
           <div>
@@ -292,8 +396,9 @@
 
   <script>
     const SHIPPING_FEE = Number(document.body.dataset.shippingFee || 70);
-    const FREE_SHIPPING_ABOVE = Number(document.body.dataset.freeShippingAbove || 1200);
+    const FREE_SHIPPING_ABOVE = Number(document.body.dataset.freeShippingAbove || 999);
     const UPI_NAME = document.body.dataset.upiName || 'Ayesha';
+    const UPI_ID = document.body.dataset.upiId || 'theloopatelier@upi';
     let basket = [];
 
     const utrInput = document.getElementById('ord-utr');
@@ -336,9 +441,29 @@
           });
         });
       });
+
+      const params = new URLSearchParams(window.location.search);
+      const catParam = params.get('category');
+      if (catParam) {
+        const matchedBtn = Array.from(document.querySelectorAll('.cat-btn')).find(
+          b => b.dataset.cat && b.dataset.cat.toLowerCase() === catParam.toLowerCase()
+        );
+        if (matchedBtn) {
+          filterCategory(matchedBtn.dataset.cat, matchedBtn);
+        }
+      }
+
       renderBasket();
       syncPaymentGate();
     });
+
+    function selectCategoryByName(cat) {
+      const targetBtn = Array.from(document.querySelectorAll('.cat-btn')).find(b => b.dataset.cat === cat);
+      if (targetBtn) {
+        filterCategory(cat, targetBtn);
+      }
+      document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
+    }
 
     function filterCategory(cat, btn) {
       document.querySelectorAll('.cat-btn').forEach(b => {
@@ -423,6 +548,7 @@
 
       const upiBtn = document.getElementById('upi-app-btn');
       if (upiBtn) {
+        const cleanPa = encodeURIComponent(String(UPI_ID || 'theloopatelier@upi').trim());
         const cleanPn = encodeURIComponent(String(UPI_NAME || 'Ayesha').trim());
         const cleanAm = encodeURIComponent(Number(tot || 0).toFixed(2));
         upiBtn.href = `upi://pay?pa=${cleanPa}&pn=${cleanPn}&am=${cleanAm}&cu=INR`;
@@ -505,17 +631,31 @@
 
     async function submitCustomInquiry(e) {
       e.preventDefault();
-      await fetch('/api/custom-inquiry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: document.getElementById('cust-name').value,
-          contact: document.getElementById('cust-contact').value,
-          item_type: document.getElementById('cust-type').value,
-          colors: document.getElementById('cust-colors').value,
-          notes: document.getElementById('cust-notes').value
-        })
-      });
+      const fileInput = document.getElementById('cust-ref-image');
+      const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+
+      if (hasFile) {
+        const fd = new FormData();
+        fd.append('name', document.getElementById('cust-name').value);
+        fd.append('contact', document.getElementById('cust-contact').value);
+        fd.append('item_type', document.getElementById('cust-type').value);
+        fd.append('colors', document.getElementById('cust-colors').value);
+        fd.append('notes', document.getElementById('cust-notes').value);
+        fd.append('reference_image', fileInput.files[0]);
+        await fetch('/api/custom-inquiry', { method: 'POST', body: fd });
+      } else {
+        await fetch('/api/custom-inquiry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('cust-name').value,
+            contact: document.getElementById('cust-contact').value,
+            item_type: document.getElementById('cust-type').value,
+            colors: document.getElementById('cust-colors').value,
+            notes: document.getElementById('cust-notes').value
+          })
+        });
+      }
       e.target.reset();
       document.getElementById('custom-msg').classList.remove('hidden');
     }

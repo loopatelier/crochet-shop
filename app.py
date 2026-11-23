@@ -21,6 +21,9 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 
+ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+
+
 # --- DATABASE MODELS ---
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,6 +35,7 @@ class Product(db.Model):
     visible = db.Column(db.Boolean, default=True)
     image_url = db.Column(db.String(300), default="")
     description = db.Column(db.Text, default="")
+
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -49,6 +53,7 @@ class Order(db.Model):
     status = db.Column(db.String(50), default="Pending Verification")
     created_at = db.Column(db.String(50), default=lambda: datetime.now().strftime("%d %b %Y, %I:%M %p"))
 
+
 class CustomInquiry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
@@ -56,24 +61,32 @@ class CustomInquiry(db.Model):
     item_type = db.Column(db.String(120), nullable=False)
     colors = db.Column(db.String(150), default="")
     notes = db.Column(db.Text, default="")
+    reference_image_url = db.Column(db.String(300), default="")
     created_at = db.Column(db.String(50), default=lambda: datetime.now().strftime("%d %b %Y"))
+
 
 class StoreSettings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     admin_email = db.Column(db.String(120), default="admin@loopatelier.com")
     password_hash = db.Column(db.String(256), nullable=False)
+    upi_id = db.Column(db.String(120), default="theloopatelier@upi")
     upi_name = db.Column(db.String(120), default="Ayesha")
     qr_image_url = db.Column(db.String(300), default="/static/upi_qr.jpeg")
     shipping_fee = db.Column(db.Float, default=70.0)
-    free_shipping_above = db.Column(db.Float, default=1200.0)
+    free_shipping_above = db.Column(db.Float, default=999.0)
+
 
 def save_uploaded_file(file_obj):
-    if not file_obj or file_obj.filename == "":
+    if not file_obj or not file_obj.filename:
+        return None
+    ext = os.path.splitext(file_obj.filename)[1].lower()
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
         return None
     filename = secure_filename(f"{int(datetime.now().timestamp())}_{file_obj.filename}")
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     file_obj.save(filepath)
     return f"/static/uploads/{filename}"
+
 
 def admin_required(f):
     @wraps(f)
@@ -83,6 +96,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
+
 # --- INITIALIZE DEFAULT DATA ---
 with app.app_context():
     db.create_all()
@@ -90,10 +104,11 @@ with app.app_context():
         default_settings = StoreSettings(
             admin_email="admin@loopatelier.com",
             password_hash=generate_password_hash("atelier2026"),
+            upi_id="theloopatelier@upi",
             upi_name="Ayesha",
             qr_image_url="/static/upi_qr.jpeg",
             shipping_fee=70.0,
-            free_shipping_above=1200.0
+            free_shipping_above=999.0
         )
         db.session.add(default_settings)
         db.session.commit()
@@ -144,12 +159,14 @@ with app.app_context():
         db.session.bulk_save_objects(sample_products)
         db.session.commit()
 
+
 # --- PUBLIC CUSTOMER ROUTES (NO ADMIN LINKS ANYWHERE) ---
 @app.route("/")
 def index():
     products = Product.query.filter_by(visible=True).all()
     settings = StoreSettings.query.first()
     return render_template("index.html", products=products, settings=settings)
+
 
 @app.route("/api/orders", methods=["POST"])
 def create_order():
@@ -173,7 +190,7 @@ def create_order():
 
     settings = StoreSettings.query.first()
     shipping_fee = float(settings.shipping_fee) if settings else 70.0
-    free_above = float(settings.free_shipping_above) if settings else 1200.0
+    free_above = float(settings.free_shipping_above) if settings else 999.0
 
     subtotal = sum(float(i.get("price", 0)) * int(i.get("qty", 1)) for i in items)
     shipping = 0.0 if subtotal == 0 or subtotal >= free_above else shipping_fee
@@ -210,19 +227,36 @@ def create_order():
         "created_at": new_order.created_at
     })
 
+
 @app.route("/api/custom-inquiry", methods=["POST"])
 def create_custom_inquiry():
-    data = request.get_json(silent=True) or {}
-    inquiry = CustomInquiry(
-        name=(data.get("name") or "").strip(),
-        contact=(data.get("contact") or "").strip(),
-        item_type=(data.get("item_type") or "").strip(),
-        colors=(data.get("colors") or "").strip(),
-        notes=(data.get("notes") or "").strip()
-    )
+    if request.content_type and "multipart/form-data" in request.content_type:
+        ref_url = save_uploaded_file(request.files.get("reference_image")) or ""
+        inquiry = CustomInquiry(
+            name=(request.form.get("name") or "").strip(),
+            contact=(request.form.get("contact") or "").strip(),
+            item_type=(request.form.get("item_type") or "").strip(),
+            colors=(request.form.get("colors") or "").strip(),
+            notes=(request.form.get("notes") or "").strip(),
+            reference_image_url=ref_url,
+        )
+    else:
+        data = request.get_json(silent=True) or {}
+        inquiry = CustomInquiry(
+            name=(data.get("name") or "").strip(),
+            contact=(data.get("contact") or "").strip(),
+            item_type=(data.get("item_type") or "").strip(),
+            colors=(data.get("colors") or "").strip(),
+            notes=(data.get("notes") or "").strip(),
+        )
+
+    if not inquiry.name or not inquiry.contact or not inquiry.item_type:
+        return jsonify({"success": False, "error": "Please provide your name, contact, and item idea."}), 400
+
     db.session.add(inquiry)
     db.session.commit()
     return jsonify({"success": True})
+
 
 # --- PRIVATE ADMIN ROUTES (ONLY ACCESSIBLE BY DIRECT URL) ---
 @app.route("/admin/login", methods=["GET", "POST"])
@@ -240,10 +274,12 @@ def admin_login():
         error = "Invalid studio credentials."
     return render_template("admin_login.html", error=error)
 
+
 @app.route("/admin/logout")
 def admin_logout():
     session.pop("is_admin", None)
     return redirect(url_for("admin_login"))
+
 
 @app.route("/admin/dashboard")
 @admin_required
@@ -280,6 +316,7 @@ def admin_dashboard():
         total_revenue=total_revenue
     )
 
+
 @app.route("/admin/product/save", methods=["POST"])
 @admin_required
 def save_product():
@@ -314,6 +351,7 @@ def save_product():
     db.session.commit()
     return redirect(url_for("admin_dashboard"))
 
+
 @app.route("/admin/product/delete/<int:prod_id>", methods=["POST"])
 @admin_required
 def delete_product(prod_id):
@@ -321,6 +359,7 @@ def delete_product(prod_id):
     db.session.delete(prod)
     db.session.commit()
     return redirect(url_for("admin_dashboard"))
+
 
 @app.route("/admin/order/status/<int:order_id>", methods=["POST"])
 @admin_required
@@ -330,10 +369,12 @@ def update_order_status(order_id):
     db.session.commit()
     return redirect(url_for("admin_dashboard") + "#orders")
 
+
 @app.route("/admin/settings", methods=["POST"])
 @admin_required
 def update_settings():
     settings = StoreSettings.query.first()
+    settings.upi_id = request.form.get("upi_id", settings.upi_id).strip()
     settings.upi_name = request.form.get("upi_name", settings.upi_name).strip()
     settings.shipping_fee = float(request.form.get("shipping_fee", settings.shipping_fee))
     settings.free_shipping_above = float(request.form.get("free_shipping_above", settings.free_shipping_above))
@@ -348,6 +389,7 @@ def update_settings():
 
     db.session.commit()
     return redirect(url_for("admin_dashboard") + "#settings")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

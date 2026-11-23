@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* Keep exact background unchanged */
     body { background: #F6F1EA; color: #2B2420; font-family: 'Plus Jakarta Sans', sans-serif; }
     .serif { font-family: 'Fraunces', serif; }
   </style>
@@ -28,7 +29,7 @@
   <main class="max-w-6xl mx-auto px-6 pt-8">
     <p class="text-xs uppercase tracking-[0.2em] text-[#7A6F66] font-semibold">Studio Overview</p>
     <h2 class="serif text-3xl mt-1">Welcome back 👋</h2>
-    <p class="text-sm text-[#7A6F66] mt-1">Manage your handmade collection and customer orders.</p>
+    <p class="text-sm text-[#7A6F66] mt-1">Manage your handmade collection, custom requests, and customer orders.</p>
 
     <!-- 4 KPI Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
@@ -67,7 +68,7 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <h3 class="serif text-2xl">Product management</h3>
-          <p class="text-xs text-[#7A6F66]">Add new items or edit the details & photos customers see in your shop.</p>
+          <p class="text-xs text-[#7A6F66]">Add new items or edit the details &amp; photos customers see in your shop.</p>
         </div>
         <button onclick="openProductModal()" class="px-5 py-2.5 rounded-full bg-[#A65D47] text-white text-sm font-medium hover:bg-[#8E4C38]">+ Add product</button>
       </div>
@@ -103,22 +104,22 @@
                 </span>
               </td>
               <td class="p-4 text-right space-x-3">
-  <button type="button"
-    onclick="editProductFromBtn(this)"
-    data-id="{{ p.id }}"
-    data-name="{{ p.name }}"
-    data-subtitle="{{ p.subtitle }}"
-    data-category="{{ p.category }}"
-    data-price="{{ p.price }}"
-    data-stock="{{ p.stock }}"
-    data-visible="{{ 'true' if p.visible else 'false' }}"
-    data-image="{{ p.image_url }}"
-    data-description="{{ p.description }}"
-    class="text-[#A65D47] font-medium hover:underline">Edit</button>
-  <form action="/admin/product/delete/{{ p.id }}" method="POST" class="inline" onsubmit="return confirm('Delete this product?')">
-    <button type="submit" class="text-red-600 hover:underline">Delete</button>
-  </form>
-</td>
+                <button type="button"
+                  onclick="editProductFromBtn(this)"
+                  data-id="{{ p.id }}"
+                  data-name="{{ p.name }}"
+                  data-subtitle="{{ p.subtitle }}"
+                  data-category="{{ p.category }}"
+                  data-price="{{ p.price }}"
+                  data-stock="{{ p.stock }}"
+                  data-visible="{{ 'true' if p.visible else 'false' }}"
+                  data-image="{{ p.image_url }}"
+                  data-description="{{ p.description }}"
+                  class="text-[#A65D47] font-medium hover:underline">Edit</button>
+                <form action="/admin/product/delete/{{ p.id }}" method="POST" class="inline" onsubmit="return confirm('Delete this product?')">
+                  <button type="submit" class="text-red-600 hover:underline">Delete</button>
+                </form>
+              </td>
             </tr>
             {% endfor %}
           </tbody>
@@ -171,14 +172,24 @@
     <!-- TAB 3: CUSTOM INQUIRIES -->
     <section id="tab-inquiries" class="tab-section hidden mt-6 space-y-4">
       <h3 class="serif text-2xl">Custom Crochet Inquiries</h3>
+      {% if not inquiries %}
+        <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-8 text-center text-sm text-[#7A6F66]">No custom inquiries received yet.</div>
+      {% endif %}
       {% for inq in inquiries %}
-      <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-5">
-        <div class="flex justify-between">
-          <p class="font-semibold">{{ inq.name }} <span class="text-xs text-[#7A6F66]">({{ inq.contact }})</span></p>
-          <span class="text-xs text-[#7A6F66]">{{ inq.created_at }}</span>
+      <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <p class="font-semibold">{{ inq.name }} <span class="text-xs font-normal text-[#7A6F66]">({{ inq.contact }})</span></p>
+            <span class="text-xs text-[#7A6F66]">• {{ inq.created_at }}</span>
+          </div>
+          <p class="text-sm text-[#A65D47] font-medium mt-1">{{ inq.item_type }} — Colors: {{ inq.colors or 'Not specified' }}</p>
+          <p class="text-xs text-[#7A6F66] mt-1">{{ inq.notes or 'No extra notes.' }}</p>
         </div>
-        <p class="text-sm text-[#A65D47] font-medium mt-1">{{ inq.item_type }} — Colors: {{ inq.colors }}</p>
-        <p class="text-xs text-[#7A6F66] mt-1">{{ inq.notes }}</p>
+        {% if inq.reference_image_url %}
+        <a href="{{ inq.reference_image_url }}" target="_blank" rel="noopener noreferrer" class="shrink-0">
+          <img src="{{ inq.reference_image_url }}" alt="Reference image for {{ inq.item_type }}" class="w-24 h-24 rounded-xl object-cover border border-[#E6DDD1] bg-white" />
+        </a>
+        {% endif %}
       </div>
       {% endfor %}
     </section>
@@ -186,10 +197,11 @@
     <!-- TAB 4: UPI QR SETTINGS -->
     <section id="tab-settings" class="tab-section hidden mt-6">
       <div class="max-w-xl bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-6">
-        <h3 class="serif text-2xl mb-4">UPI Scanner & Store Settings</h3>
+        <h3 class="serif text-2xl mb-4">UPI Scanner &amp; Store Settings</h3>
         <form action="/admin/settings" method="POST" enctype="multipart/form-data" class="space-y-4 text-sm">
           <div>
             <label class="block text-xs font-semibold uppercase text-[#7A6F66] mb-1">Your UPI ID (GPay / PhonePe / Paytm)</label>
+            <input type="text" name="upi_id" value="{{ settings.upi_id or 'theloopatelier@upi' }}" required placeholder="yourname@upi" class="w-full px-4 py-2.5 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
           </div>
           <div>
             <label class="block text-xs font-semibold uppercase text-[#7A6F66] mb-1">Payee Display Name</label>
@@ -243,10 +255,10 @@
           <div>
             <label class="block text-xs font-semibold text-[#7A6F66]">Category</label>
             <select name="category" id="prod-category" class="w-full px-3.5 py-2 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]">
-              <option>Wearables & Keepsakes</option>
-              <option>Amigurumi & Key Charms</option>
-              <option>Bouquets & Bags</option>
-              <option>Book & Pet Accessories</option>
+              <option>Wearables &amp; Keepsakes</option>
+              <option>Amigurumi &amp; Key Charms</option>
+              <option>Bouquets &amp; Bags</option>
+              <option>Book &amp; Pet Accessories</option>
             </select>
           </div>
         </div>
@@ -297,6 +309,7 @@
       active.classList.add('bg-[#2B2420]', 'text-white');
     }
     if (location.hash === '#orders') showTab('orders');
+    if (location.hash === '#inquiries') showTab('inquiries');
     if (location.hash === '#settings') showTab('settings');
 
     function openProductModal() {
@@ -311,19 +324,19 @@
       document.getElementById('productModal').classList.add('flex');
     }
     function editProductFromBtn(btn) {
-  document.getElementById('modalTitle').innerText = 'Edit Product';
-  document.getElementById('prod-id').value = btn.dataset.id;
-  document.getElementById('prod-name').value = btn.dataset.name;
-  document.getElementById('prod-subtitle').value = btn.dataset.subtitle;
-  document.getElementById('prod-category').value = btn.dataset.category;
-  document.getElementById('prod-price').value = btn.dataset.price;
-  document.getElementById('prod-stock').value = btn.dataset.stock;
-  document.getElementById('prod-visible').value = btn.dataset.visible;
-  document.getElementById('prod-image-url').value = btn.dataset.image;
-  document.getElementById('prod-description').value = btn.dataset.description;
-  document.getElementById('productModal').classList.remove('hidden');
-  document.getElementById('productModal').classList.add('flex');
-}
+      document.getElementById('modalTitle').innerText = 'Edit Product';
+      document.getElementById('prod-id').value = btn.dataset.id;
+      document.getElementById('prod-name').value = btn.dataset.name;
+      document.getElementById('prod-subtitle').value = btn.dataset.subtitle;
+      document.getElementById('prod-category').value = btn.dataset.category;
+      document.getElementById('prod-price').value = btn.dataset.price;
+      document.getElementById('prod-stock').value = btn.dataset.stock;
+      document.getElementById('prod-visible').value = btn.dataset.visible;
+      document.getElementById('prod-image-url').value = btn.dataset.image;
+      document.getElementById('prod-description').value = btn.dataset.description;
+      document.getElementById('productModal').classList.remove('hidden');
+      document.getElementById('productModal').classList.add('flex');
+    }
     function closeProductModal() {
       document.getElementById('productModal').classList.add('hidden');
       document.getElementById('productModal').classList.remove('flex');
