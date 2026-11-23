@@ -33,15 +33,15 @@
   <!-- Navbar (Customer Only — No Admin Link) -->
   <header class="sticky top-0 z-40 bg-[#F6F1EA]/90 backdrop-blur-md border-b border-[#E6DDD1]">
     <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <a href="#" class="flex items-center gap-2.5">
+      <a href="#" onclick="closeProductDetail()" class="flex items-center gap-2.5">
         <span class="w-8 h-8 rounded-full bg-[#A65D47] text-white flex items-center justify-center serif font-semibold text-sm">L</span>
         <span class="serif text-xl font-semibold">The Loop Atelier</span>
       </a>
       <nav class="hidden md:flex items-center gap-8 text-sm text-[#7A6F66]">
-        <a href="#corners" class="hover:text-[#2B2420]">Collections</a>
-        <a href="#shop" class="hover:text-[#2B2420]">Shop All</a>
-        <a href="#story" class="hover:text-[#2B2420]">Our Story</a>
-        <a href="#custom" class="hover:text-[#2B2420]">Custom Orders</a>
+        <a href="#corners" onclick="closeProductDetail()" class="hover:text-[#2B2420]">Collections</a>
+        <a href="#shop" onclick="closeProductDetail()" class="hover:text-[#2B2420]">Shop All</a>
+        <a href="#story" onclick="closeProductDetail()" class="hover:text-[#2B2420]">Our Story</a>
+        <a href="#custom" onclick="closeProductDetail()" class="hover:text-[#2B2420]">Custom Orders</a>
       </nav>
       <button type="button" onclick="toggleBasket(true)" class="px-4 py-2 rounded-full bg-[#FDFBF8] border border-[#E6DDD1] text-sm font-medium flex items-center gap-2 shadow-sm hover:border-[#A65D47]">
         <span>🛍️ Basket</span>
@@ -50,201 +50,327 @@
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="max-w-6xl mx-auto px-6 py-12 md:py-18 grid md:grid-cols-2 gap-12 items-center">
-    <div>
-      <span class="inline-block text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold mb-4">🧶 A Little Studio of Yarn &amp; Patience</span>
-      <h1 class="serif text-5xl md:text-6xl leading-[1.08] font-normal">
-        Handmade with love, woven with <em class="text-[#A65D47]">memories.</em>
-      </h1>
-      <p class="text-[#7A6F66] mt-5 leading-relaxed max-w-md">
-        Welcome to The Loop Atelier (<span class="text-[#2B2420] font-medium">@the_loop.atelier</span>). Every bouquet, bag, charm, and keepsake is looped by hand, one stitch at a time — never mass-produced, never in a hurry.
-      </p>
-      <div class="flex flex-wrap gap-3 mt-8">
-        <a href="#shop" class="px-7 py-3.5 rounded-full bg-[#A65D47] text-white text-sm font-medium hover:bg-[#8E4C38] transition">Shop Now</a>
-        <a href="#custom" class="px-7 py-3.5 rounded-full border border-[#D4C7B8] bg-[#FDFBF8] text-sm font-medium hover:border-[#A65D47] transition">Custom Request</a>
-      </div>
-      <div class="flex flex-wrap gap-6 mt-10 pt-6 border-t border-[#E6DDD1] text-xs text-[#7A6F66]">
-        <span>🤍 100% Handmade</span>
-        <span>⭐ 4.9★ Customer Love</span>
-        <span>📦 Safe &amp; Careful Packaging</span>
-      </div>
-    </div>
+  <!-- ========================================================= -->
+  <!-- PRODUCT DETAIL PAGE VIEW (Opens when clicking a product)  -->
+  <!-- ========================================================= -->
+  <section id="product-detail-view" class="hidden max-w-5xl mx-auto px-5 sm:px-6 py-8 pb-20">
+    <!-- Back to Products -->
+    <button type="button" onclick="closeProductDetail()" class="inline-flex items-center gap-2 text-sm text-[#7A6F66] hover:text-[#2B2420] mb-6 transition">
+      <span>←</span>
+      <span>Back to Products</span>
+    </button>
 
-    <!-- Arched Hero Emblem -->
-    <div class="flex justify-center">
-      <div class="w-full max-w-md bg-[#FDFBF8] border-2 border-[#E6DDD1] rounded-t-[180px] rounded-b-3xl p-6 shadow-sm">
-        <div class="rounded-t-[160px] rounded-b-2xl overflow-hidden border border-[#E6DDD1] aspect-[4/4.3] relative">
-          <img src="/static/cro1.jpeg" alt="The Loop Atelier Crochet" class="w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-gradient-to-t from-[#2B2420]/70 via-transparent to-transparent flex flex-col justify-end p-6 text-center text-white">
-            <p class="serif text-3xl italic">The Loop Atelier</p>
-            <p class="text-[11px] uppercase tracking-[0.25em] mt-1 opacity-90">crochet • create • cherish</p>
+    <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
+      <!-- Left: Carousel Gallery + Thumbnail Strip -->
+      <div>
+        <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl p-3 shadow-sm">
+          <div class="relative aspect-[4/4.5] rounded-2xl overflow-hidden bg-[#EFE8DD]">
+            <img id="pd-main-image" src="" alt="" class="w-full h-full object-cover transition duration-300" />
+
+            <!-- Left / Right Carousel Arrows -->
+            <button type="button" id="pd-prev-btn" onclick="stepGallery(-1)" aria-label="Previous image"
+              class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-[#FDFBF8]/95 border border-[#E6DDD1] text-[#2B2420] flex items-center justify-center shadow-sm hover:bg-white">
+              ‹
+            </button>
+            <button type="button" id="pd-next-btn" onclick="stepGallery(1)" aria-label="Next image"
+              class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-[#FDFBF8]/95 border border-[#E6DDD1] text-[#2B2420] flex items-center justify-center shadow-sm hover:bg-white">
+              ›
+            </button>
+
+            <!-- Carousel Dots Pill -->
+            <div id="pd-dots" class="absolute bottom-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 rounded-full bg-[#2B2420]/45 backdrop-blur-sm flex items-center gap-1.5"></div>
           </div>
         </div>
+
+        <!-- Thumbnail Strip -->
+        <div id="pd-thumbs" class="grid grid-cols-4 gap-3 mt-3"></div>
       </div>
-    </div>
-  </section>
 
-  <!-- Find Your Favourite Corner (Collection Cards) -->
-  <section id="corners" class="max-w-6xl mx-auto px-6 py-10">
-    <div class="flex items-end justify-between gap-4 mb-6">
-      <div>
-        <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Explore Collections</span>
-        <h2 class="serif text-3xl md:text-4xl mt-1">Find Your Favourite Corner</h2>
-      </div>
-      <a href="#shop" onclick="selectCategoryByName('All')" class="text-xs font-semibold text-[#A65D47] hover:underline">View All Pieces →</a>
-    </div>
+      <!-- Right: Product Info, Quantity, Add to Basket, Wishlist & Reviews -->
+      <div class="pt-1">
+        <p id="pd-category" class="text-xs uppercase tracking-[0.16em] text-[#7A6F66] font-semibold"></p>
+        <h1 id="pd-name" class="serif text-3xl sm:text-4xl text-[#2B2420] mt-1.5 leading-tight"></h1>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <button type="button" onclick="selectCategoryByName('Bouquets & Bags')" class="text-left bg-[#FDFBF8] border border-[#E6DDD1] hover:border-[#A65D47] rounded-2xl p-5 transition group">
-        <p class="text-xs font-semibold text-[#A65D47]">💐 Blooms &amp; Totes</p>
-        <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">Bouquets &amp; Bags</h3>
-        <p class="text-xs text-[#7A6F66] mt-1">Everlasting flower bouquets, slings &amp; totes.</p>
-      </button>
+        <div class="flex items-center gap-3 mt-3">
+          <span id="pd-price" class="text-2xl sm:text-3xl font-bold text-[#2B2420]"></span>
+          <span class="inline-flex items-center gap-1 text-sm font-medium text-[#7A6F66]">
+            <span class="text-amber-500">★</span> <span id="pd-rating-inline">4.9</span>
+          </span>
+        </div>
 
-      <button type="button" onclick="selectCategoryByName('Wearables & Keepsakes')" class="text-left bg-[#FDFBF8] border border-[#E6DDD1] hover:border-[#A65D47] rounded-2xl p-5 transition group">
-        <p class="text-xs font-semibold text-[#A65D47]">🎀 Tops &amp; Hair Edits</p>
-        <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">Wearables &amp; Keepsakes</h3>
-        <p class="text-xs text-[#7A6F66] mt-1">Crochet tops, hair clips, ties &amp; headbands.</p>
-      </button>
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <span class="inline-block px-3.5 py-1 rounded-full bg-[#E3EAD8] text-[#3F5232] text-xs font-semibold">
+            100% Handmade
+          </span>
+          <span id="pd-subtitle" class="inline-block px-3.5 py-1 rounded-full bg-[#FDFBF8] border border-[#E6DDD1] text-[#7A6F66] text-xs"></span>
+        </div>
 
-      <button type="button" onclick="selectCategoryByName('Amigurumi & Key Charms')" class="text-left bg-[#FDFBF8] border border-[#E6DDD1] hover:border-[#A65D47] rounded-2xl p-5 transition group">
-        <p class="text-xs font-semibold text-[#A65D47]">🧸 Cute Charms</p>
-        <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">Amigurumi &amp; Key Charms</h3>
-        <p class="text-xs text-[#7A6F66] mt-1">Bag charms, plushies &amp; pocket keychains.</p>
-      </button>
+        <p id="pd-description" class="text-sm text-[#6E635B] leading-relaxed mt-5"></p>
 
-      <button type="button" onclick="selectCategoryByName('Book & Pet Accessories')" class="text-left bg-[#FDFBF8] border border-[#E6DDD1] hover:border-[#A65D47] rounded-2xl p-5 transition group">
-        <p class="text-xs font-semibold text-[#A65D47]">📖 Cozy Extras</p>
-        <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">Book &amp; Pet Accessories</h3>
-        <p class="text-xs text-[#7A6F66] mt-1">Thoughtful bookmarks &amp; handmade accents.</p>
-      </button>
-    </div>
-  </section>
-
-  <!-- Shop Collection -->
-  <section id="shop" class="max-w-6xl mx-auto px-6 py-12">
-    <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
-      <div>
-        <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Curated &amp; Trending Pieces</span>
-        <h2 class="serif text-4xl mt-1">Handmade Collection</h2>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <button type="button" data-cat="All" onclick="filterCategory('All', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#2B2420] text-white">All</button>
-        <button type="button" data-cat="Wearables & Keepsakes" onclick="filterCategory('Wearables & Keepsakes', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Wearables &amp; Keepsakes</button>
-        <button type="button" data-cat="Amigurumi & Key Charms" onclick="filterCategory('Amigurumi & Key Charms', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Amigurumi &amp; Key Charms</button>
-        <button type="button" data-cat="Bouquets & Bags" onclick="filterCategory('Bouquets & Bags', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Bouquets &amp; Bags</button>
-        <button type="button" data-cat="Book & Pet Accessories" onclick="filterCategory('Book & Pet Accessories', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Book &amp; Pet Accessories</button>
-      </div>
-    </div>
-
-    <div id="product-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
-      {% for p in products %}
-      <div data-category="{{ p.category }}" class="product-card bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl overflow-hidden flex flex-col justify-between hover:shadow-md transition">
-        <div>
-          <div class="aspect-square overflow-hidden bg-[#EFE8DD] relative">
-            <img src="{{ p.image_url }}" alt="{{ p.name }}" class="w-full h-full object-cover hover:scale-105 transition duration-500" />
-            {% if loop.index <= 2 %}
-            <span class="absolute top-3 right-3 px-3 py-1 rounded-full bg-[#FDFBF8]/95 border border-[#E6DDD1] text-[#2B2420] text-[11px] font-semibold">⭐ Best Seller</span>
-            {% endif %}
-            {% if p.stock is defined and p.stock <= 0 %}
-            <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#2B2420] text-white text-xs">Made to Order</span>
-            {% endif %}
-          </div>
-          <div class="p-5">
-            <div class="flex items-center justify-between gap-2">
-              <p class="text-[11px] uppercase tracking-wider text-[#A65D47] font-semibold">{{ p.category }}</p>
-              <span class="text-[11px] text-[#7A6F66] font-medium">4.9 ★</span>
-            </div>
-            <h3 class="serif text-xl mt-1">{{ p.name }}</h3>
-            {% if p.subtitle is defined and p.subtitle %}
-            <p class="text-xs text-[#7A6F66] mt-0.5">{{ p.subtitle }}</p>
-            {% endif %}
-            <p class="text-xs text-[#7A6F66] mt-2 line-clamp-2">{{ p.description }}</p>
+        <!-- Quantity Selector -->
+        <div class="mt-6">
+          <label class="block text-[11px] uppercase tracking-[0.16em] text-[#7A6F66] font-semibold mb-2">Quantity</label>
+          <div class="inline-flex items-center justify-between w-40 px-4 py-2.5 rounded-full bg-[#FDFBF8] border border-[#E6DDD1]">
+            <button type="button" onclick="changeDetailQty(-1)" class="w-7 h-7 rounded-full text-lg text-[#7A6F66] hover:text-[#2B2420] flex items-center justify-center">−</button>
+            <span id="pd-qty" class="text-sm font-semibold text-[#2B2420]">1</span>
+            <button type="button" onclick="changeDetailQty(1)" class="w-7 h-7 rounded-full text-lg text-[#7A6F66] hover:text-[#2B2420] flex items-center justify-center">+</button>
           </div>
         </div>
-        <div class="px-5 pb-5 pt-2 flex items-center justify-between">
-          <span class="serif text-xl font-semibold">₹{{ "%.0f"|format(p.price) }}</span>
-          <button
-            type="button"
-            class="add-to-basket-btn px-5 py-2 rounded-full bg-[#2B2420] hover:bg-[#A65D47] text-white text-xs font-medium transition"
-            data-id="{{ p.id }}"
-            data-name="{{ p.name|e }}"
-            data-price="{{ p.price }}"
-            data-image="{{ p.image_url|e }}"
-          >
-            + Add to Basket
+
+        <!-- Primary Add to Basket & Secondary Wishlist Buttons -->
+        <div class="mt-6 space-y-3">
+          <button type="button" onclick="addDetailProductToBasket()"
+            class="w-full py-4 rounded-full bg-[#3D2E27] hover:bg-[#A65D47] text-white text-sm font-medium flex items-center justify-center gap-2.5 transition shadow-sm">
+            <span>🛍️</span>
+            <span>Add to Basket</span>
+          </button>
+
+          <button type="button" id="pd-wishlist-btn" onclick="toggleDetailWishlist()"
+            class="w-full py-3.5 rounded-full bg-[#FDFBF8] border border-[#D4C7B8] hover:border-[#A65D47] text-[#2B2420] text-sm font-medium flex items-center justify-center gap-2 transition">
+            <span id="pd-wishlist-icon">♡</span>
+            <span id="pd-wishlist-text">Wishlist</span>
           </button>
         </div>
-      </div>
-      {% endfor %}
-    </div>
-  </section>
 
-  <!-- Your Crochet Journey (4-Step Process) -->
-  <section class="max-w-6xl mx-auto px-6 py-10">
-    <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl p-7 md:p-10">
-      <div class="text-center max-w-xl mx-auto mb-8">
-        <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">How It Works</span>
-        <h2 class="serif text-3xl mt-1">Your Crochet Journey</h2>
-      </div>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 text-sm">
-        <div class="bg-[#F6F1EA] border border-[#E6DDD1] rounded-2xl p-5">
-          <span class="text-xs font-bold text-[#A65D47]">01 • DREAM IT</span>
-          <h3 class="serif text-lg mt-1">Pick or Pitch</h3>
-          <p class="text-xs text-[#7A6F66] mt-1">Choose a ready design or share your inspiration photo and colors.</p>
-        </div>
-        <div class="bg-[#F6F1EA] border border-[#E6DDD1] rounded-2xl p-5">
-          <span class="text-xs font-bold text-[#A65D47]">02 • WE CREATE IT</span>
-          <h3 class="serif text-lg mt-1">Stitched by Hand</h3>
-          <p class="text-xs text-[#7A6F66] mt-1">Crafted carefully from scratch in small batches with cozy yarn.</p>
-        </div>
-        <div class="bg-[#F6F1EA] border border-[#E6DDD1] rounded-2xl p-5">
-          <span class="text-xs font-bold text-[#A65D47]">03 • WE WRAP IT</span>
-          <h3 class="serif text-lg mt-1">Packed with Care</h3>
-          <p class="text-xs text-[#7A6F66] mt-1">Wrapped neatly so delicate flowers, bags, and charms arrive safely.</p>
-        </div>
-        <div class="bg-[#F6F1EA] border border-[#E6DDD1] rounded-2xl p-5">
-          <span class="text-xs font-bold text-[#A65D47]">04 • YOU TREASURE IT</span>
-          <h3 class="serif text-lg mt-1">Keepsake Joy</h3>
-          <p class="text-xs text-[#7A6F66] mt-1">A thoughtful gift or everyday accessory made to be cherished.</p>
+        <!-- Customer Reviews Section -->
+        <div class="mt-10 pt-8 border-t border-[#E6DDD1]">
+          <p class="serif italic text-sm text-[#A65D47]">what our customers say</p>
+          <h2 class="serif text-2xl sm:text-3xl text-[#2B2420] mt-0.5">Customer Reviews</h2>
+
+          <!-- Rating Summary Card -->
+          <div class="mt-4 inline-flex items-center gap-4 bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl px-5 py-3.5">
+            <span id="pd-review-score" class="serif text-3xl font-bold text-[#2B2420]">4.9</span>
+            <div>
+              <div class="text-amber-500 text-sm tracking-wider">★★★★★</div>
+              <p id="pd-review-count" class="text-xs text-[#7A6F66] mt-0.5">3 reviews</p>
+            </div>
+          </div>
+
+          <!-- Review List -->
+          <div id="pd-reviews-list" class="mt-4 space-y-3"></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Our Story -->
-  <section id="story" class="max-w-4xl mx-auto px-6 py-12 text-center">
-    <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl p-8 md:p-12">
-      <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Slow Craftsmanship</span>
-      <h2 class="serif text-3xl md:text-4xl mt-2">Every stitch tells a story</h2>
-      <p class="text-sm text-[#7A6F66] mt-4 leading-relaxed">
-        Born out of a love for tactile yarn art and cozy keepsakes, <strong class="text-[#2B2420]">@the_loop.atelier</strong> creates small-batch crochet pieces meant to last for years. Each bouquet, bag, charm, and wearable is carefully handmade from scratch once you place your order.
-      </p>
-    </div>
-  </section>
-
-  <!-- Custom Commission Form (With Reference Image Support) -->
-  <section id="custom" class="max-w-3xl mx-auto px-6 py-12">
-    <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl p-8">
-      <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Bespoke Orders • "Can You Make This?"</span>
-      <h2 class="serif text-3xl mt-1">Customize Your Own Piece</h2>
-      <p class="text-xs text-[#7A6F66] mt-1">Have a custom bouquet, bag, character charm, or reference photo in mind? Send a request directly to the studio.</p>
-      <form onsubmit="submitCustomInquiry(event)" enctype="multipart/form-data" class="grid sm:grid-cols-2 gap-4 mt-6 text-sm">
-        <input type="text" id="cust-name" required placeholder="Your Name" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
-        <input type="text" id="cust-contact" required placeholder="WhatsApp Number or @Instagram" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
-        <input type="text" id="cust-type" required placeholder="Item Idea (e.g. Rose Tote, Bouquet Charm)" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
-        <input type="text" id="cust-colors" placeholder="Preferred Colors (e.g. Sage &amp; Cream)" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
-        <div class="sm:col-span-2 px-4 py-3 rounded-xl bg-[#F6F1EA] border border-dashed border-[#D4C7B8]">
-          <label for="cust-ref-image" class="block text-xs font-semibold text-[#2B2420] mb-1">Reference Image (Optional — JPG, PNG or WEBP)</label>
-          <input type="file" id="cust-ref-image" accept="image/jpeg,image/png,image/webp" class="w-full text-xs text-[#7A6F66]" />
+  <!-- ========================================================= -->
+  <!-- MAIN STOREFRONT VIEW                                      -->
+  <!-- ========================================================= -->
+  <main id="storefront-main">
+    <!-- Hero Section -->
+    <section class="max-w-6xl mx-auto px-6 py-12 md:py-18 grid md:grid-cols-2 gap-12 items-center">
+      <div>
+        <span class="inline-block text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold mb-4">🧶 A Little Studio of Yarn &amp; Patience</span>
+        <h1 class="serif text-5xl md:text-6xl leading-[1.08] font-normal">
+          Handmade with love, woven with <em class="text-[#A65D47]">memories.</em>
+        </h1>
+        <p class="text-[#7A6F66] mt-5 leading-relaxed max-w-md">
+          Welcome to The Loop Atelier (<span class="text-[#2B2420] font-medium">@the_loop.atelier</span>). Every bouquet, bag, charm, and keepsake is looped by hand, one stitch at a time — never mass-produced, never in a hurry.
+        </p>
+        <div class="flex flex-wrap gap-3 mt-8">
+          <a href="#shop" class="px-7 py-3.5 rounded-full bg-[#A65D47] text-white text-sm font-medium hover:bg-[#8E4C38] transition">Shop Now</a>
+          <a href="#custom" class="px-7 py-3.5 rounded-full border border-[#D4C7B8] bg-[#FDFBF8] text-sm font-medium hover:border-[#A65D47] transition">Custom Request</a>
         </div>
-        <textarea id="cust-notes" rows="2" placeholder="Size, deadline, or extra details..." class="sm:col-span-2 px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]"></textarea>
-        <button type="submit" class="sm:col-span-2 py-3.5 rounded-full bg-[#A65D47] text-white font-medium hover:bg-[#8E4C38]">Send Custom Request</button>
-      </form>
-      <p id="custom-msg" class="hidden text-center text-xs text-emerald-700 font-medium mt-3">✨ Request received! We will message you soon on WhatsApp/Instagram.</p>
-    </div>
-  </section>
+        <div class="flex flex-wrap gap-6 mt-10 pt-6 border-t border-[#E6DDD1] text-xs text-[#7A6F66]">
+          <span>🤍 100% Handmade</span>
+          <span>⭐ 4.9★ Customer Love</span>
+          <span>📦 Safe &amp; Careful Packaging</span>
+        </div>
+      </div>
+
+      <!-- Arched Hero Emblem -->
+      <div class="flex justify-center">
+        <div class="w-full max-w-md bg-[#FDFBF8] border-2 border-[#E6DDD1] rounded-t-[180px] rounded-b-3xl p-6 shadow-sm">
+          <div class="rounded-t-[160px] rounded-b-2xl overflow-hidden border border-[#E6DDD1] aspect-[4/4.3] relative">
+            <img src="/static/cro1.jpeg" alt="The Loop Atelier Crochet" class="w-full h-full object-cover" />
+            <div class="absolute inset-0 bg-gradient-to-t from-[#2B2420]/70 via-transparent to-transparent flex flex-col justify-end p-6 text-center text-white">
+              <p class="serif text-3xl italic">The Loop Atelier</p>
+              <p class="text-[11px] uppercase tracking-[0.25em] mt-1 opacity-90">crochet • create • cherish</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Find Your Favourite Corner (Collection Cards) -->
+    <section id="corners" class="max-w-6xl mx-auto px-6 py-10">
+      <div class="flex items-end justify-between gap-4 mb-6">
+        <div>
+          <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Explore Collections</span>
+          <h2 class="serif text-3xl md:text-4xl mt-1">Find Your Favourite Corner</h2>
+        </div>
+        <a href="#shop" onclick="selectCategoryByName('All')" class="text-xs font-semibold text-[#A65D47] hover:underline">View All Pieces →</a>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <button type="button" onclick="selectCategoryByName('Bouquets & Bags')" class="text-left bg-[#FDFBF8] border border-[#E6DDD1] hover:border-[#A65D47] rounded-2xl p-5 transition group">
+          <p class="text-xs font-semibold text-[#A65D47]">💐 Blooms &amp; Totes</p>
+          <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">Bouquets &amp; Bags</h3>
+          <p class="text-xs text-[#7A6F66] mt-1">Everlasting flower bouquets, slings &amp; totes.</p>
+        </button>
+
+        <button type="button" onclick="selectCategoryByName('Wearables & Keepsakes')" class="text-left bg-[#FDFBF8] border border-[#E6DDD1] hover:border-[#A65D47] rounded-2xl p-5 transition group">
+          <p class="text-xs font-semibold text-[#A65D47]">🎀 Tops &amp; Hair Edits</p>
+          <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">Wearables &amp; Keepsakes</h3>
+          <p class="text-xs text-[#7A6F66] mt-1">Crochet tops, hair clips, ties &amp; headbands.</p>
+        </button>
+
+        <button type="button" onclick="selectCategoryByName('Amigurumi & Key Charms')" class="text-left bg-[#FDFBF8] border border-[#E6DDD1] hover:border-[#A65D47] rounded-2xl p-5 transition group">
+          <p class="text-xs font-semibold text-[#A65D47]">🧸 Cute Charms</p>
+          <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">Amigurumi &amp; Key Charms</h3>
+          <p class="text-xs text-[#7A6F66] mt-1">Bag charms, plushies &amp; pocket keychains.</p>
+        </button>
+
+        <button type="button" onclick="selectCategoryByName('Book & Pet Accessories')" class="text-left bg-[#FDFBF8] border border-[#E6DDD1] hover:border-[#A65D47] rounded-2xl p-5 transition group">
+          <p class="text-xs font-semibold text-[#A65D47]">📖 Cozy Extras</p>
+          <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">Book &amp; Pet Accessories</h3>
+          <p class="text-xs text-[#7A6F66] mt-1">Thoughtful bookmarks &amp; handmade accents.</p>
+        </button>
+      </div>
+    </section>
+
+    <!-- Shop Collection -->
+    <section id="shop" class="max-w-6xl mx-auto px-6 py-12">
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+        <div>
+          <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Curated &amp; Trending Pieces</span>
+          <h2 class="serif text-4xl mt-1">Handmade Collection</h2>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" data-cat="All" onclick="filterCategory('All', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#2B2420] text-white">All</button>
+          <button type="button" data-cat="Wearables & Keepsakes" onclick="filterCategory('Wearables & Keepsakes', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Wearables &amp; Keepsakes</button>
+          <button type="button" data-cat="Amigurumi & Key Charms" onclick="filterCategory('Amigurumi & Key Charms', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Amigurumi &amp; Key Charms</button>
+          <button type="button" data-cat="Bouquets & Bags" onclick="filterCategory('Bouquets & Bags', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Bouquets &amp; Bags</button>
+          <button type="button" data-cat="Book & Pet Accessories" onclick="filterCategory('Book & Pet Accessories', this)" class="cat-btn px-4 py-1.5 rounded-full text-xs font-medium bg-[#FDFBF8] border border-[#E6DDD1]">Book &amp; Pet Accessories</button>
+        </div>
+      </div>
+
+      <div id="product-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
+        {% for p in products %}
+        <div
+          data-category="{{ p.category }}"
+          data-id="{{ p.id }}"
+          data-name="{{ p.name|e }}"
+          data-subtitle="{{ (p.subtitle or '100% Handmade')|e }}"
+          data-price="{{ p.price }}"
+          data-image="{{ p.image_url|e }}"
+          data-gallery='{{ (p.gallery_images_json if (p.gallery_images_json is defined and p.gallery_images_json) else "[]")|e }}'
+          data-description="{{ (p.description or '')|e }}"
+          onclick="openProductDetailFromCard(this)"
+          class="product-card cursor-pointer bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl overflow-hidden flex flex-col justify-between hover:shadow-md hover:border-[#A65D47]/50 transition group"
+        >
+          <div>
+            <div class="aspect-square overflow-hidden bg-[#EFE8DD] relative">
+              <img src="{{ p.image_url }}" alt="{{ p.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+              {% if loop.index <= 2 %}
+              <span class="absolute top-3 right-3 px-3 py-1 rounded-full bg-[#FDFBF8]/95 border border-[#E6DDD1] text-[#2B2420] text-[11px] font-semibold">⭐ Best Seller</span>
+              {% endif %}
+              {% if p.stock is defined and p.stock <= 0 %}
+              <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#2B2420] text-white text-xs">Made to Order</span>
+              {% endif %}
+            </div>
+            <div class="p-5">
+              <div class="flex items-center justify-between gap-2">
+                <p class="text-[11px] uppercase tracking-wider text-[#A65D47] font-semibold">{{ p.category }}</p>
+                <span class="text-[11px] text-[#7A6F66] font-medium">4.9 ★</span>
+              </div>
+              <h3 class="serif text-xl mt-1 group-hover:text-[#A65D47] transition">{{ p.name }}</h3>
+              {% if p.subtitle is defined and p.subtitle %}
+              <p class="text-xs text-[#7A6F66] mt-0.5">{{ p.subtitle }}</p>
+              {% endif %}
+              <p class="text-xs text-[#7A6F66] mt-2 line-clamp-2">{{ p.description }}</p>
+            </div>
+          </div>
+          <div class="px-5 pb-5 pt-2 flex items-center justify-between">
+            <span class="serif text-xl font-semibold">₹{{ "%.0f"|format(p.price) }}</span>
+            <button
+              type="button"
+              onclick="event.stopPropagation()"
+              class="add-to-basket-btn px-5 py-2 rounded-full bg-[#2B2420] hover:bg-[#A65D47] text-white text-xs font-medium transition"
+              data-id="{{ p.id }}"
+              data-name="{{ p.name|e }}"
+              data-price="{{ p.price }}"
+              data-image="{{ p.image_url|e }}"
+            >
+              + Add to Basket
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Your Crochet Journey (4-Step Process) -->
+    <section class="max-w-6xl mx-auto px-6 py-10">
+      <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl p-7 md:p-10">
+        <div class="text-center max-w-xl mx-auto mb-8">
+          <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">How It Works</span>
+          <h2 class="serif text-3xl mt-1">Your Crochet Journey</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 text-sm">
+          <div class="bg-[#F6F1EA] border border-[#E6DDD1] rounded-2xl p-5">
+            <span class="text-xs font-bold text-[#A65D47]">01 • DREAM IT</span>
+            <h3 class="serif text-lg mt-1">Pick or Pitch</h3>
+            <p class="text-xs text-[#7A6F66] mt-1">Choose a ready design or share your inspiration photo and colors.</p>
+          </div>
+          <div class="bg-[#F6F1EA] border border-[#E6DDD1] rounded-2xl p-5">
+            <span class="text-xs font-bold text-[#A65D47]">02 • WE CREATE IT</span>
+            <h3 class="serif text-lg mt-1">Stitched by Hand</h3>
+            <p class="text-xs text-[#7A6F66] mt-1">Crafted carefully from scratch in small batches with cozy yarn.</p>
+          </div>
+          <div class="bg-[#F6F1EA] border border-[#E6DDD1] rounded-2xl p-5">
+            <span class="text-xs font-bold text-[#A65D47]">03 • WE WRAP IT</span>
+            <h3 class="serif text-lg mt-1">Packed with Care</h3>
+            <p class="text-xs text-[#7A6F66] mt-1">Wrapped neatly so delicate flowers, bags, and charms arrive safely.</p>
+          </div>
+          <div class="bg-[#F6F1EA] border border-[#E6DDD1] rounded-2xl p-5">
+            <span class="text-xs font-bold text-[#A65D47]">04 • YOU TREASURE IT</span>
+            <h3 class="serif text-lg mt-1">Keepsake Joy</h3>
+            <p class="text-xs text-[#7A6F66] mt-1">A thoughtful gift or everyday accessory made to be cherished.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Our Story -->
+    <section id="story" class="max-w-4xl mx-auto px-6 py-12 text-center">
+      <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl p-8 md:p-12">
+        <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Slow Craftsmanship</span>
+        <h2 class="serif text-3xl md:text-4xl mt-2">Every stitch tells a story</h2>
+        <p class="text-sm text-[#7A6F66] mt-4 leading-relaxed">
+          Born out of a love for tactile yarn art and cozy keepsakes, <strong class="text-[#2B2420]">@the_loop.atelier</strong> creates small-batch crochet pieces meant to last for years. Each bouquet, bag, charm, and wearable is carefully handmade from scratch once you place your order.
+        </p>
+      </div>
+    </section>
+
+    <!-- Custom Commission Form (With Reference Image Support) -->
+    <section id="custom" class="max-w-3xl mx-auto px-6 py-12">
+      <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-3xl p-8">
+        <span class="text-xs uppercase tracking-[0.2em] text-[#A65D47] font-semibold">Bespoke Orders • "Can You Make This?"</span>
+        <h2 class="serif text-3xl mt-1">Customize Your Own Piece</h2>
+        <p class="text-xs text-[#7A6F66] mt-1">Have a custom bouquet, bag, character charm, or reference photo in mind? Send a request directly to the studio.</p>
+        <form onsubmit="submitCustomInquiry(event)" enctype="multipart/form-data" class="grid sm:grid-cols-2 gap-4 mt-6 text-sm">
+          <input type="text" id="cust-name" required placeholder="Your Name" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+          <input type="text" id="cust-contact" required placeholder="WhatsApp Number or @Instagram" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+          <input type="text" id="cust-type" required placeholder="Item Idea (e.g. Rose Tote, Bouquet Charm)" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+          <input type="text" id="cust-colors" placeholder="Preferred Colors (e.g. Sage &amp; Cream)" class="px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
+          <div class="sm:col-span-2 px-4 py-3 rounded-xl bg-[#F6F1EA] border border-dashed border-[#D4C7B8]">
+            <label for="cust-ref-image" class="block text-xs font-semibold text-[#2B2420] mb-1">Reference Image (Optional — JPG, PNG or WEBP)</label>
+            <input type="file" id="cust-ref-image" accept="image/jpeg,image/png,image/webp" class="w-full text-xs text-[#7A6F66]" />
+          </div>
+          <textarea id="cust-notes" rows="2" placeholder="Size, deadline, or extra details..." class="sm:col-span-2 px-4 py-3 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]"></textarea>
+          <button type="submit" class="sm:col-span-2 py-3.5 rounded-full bg-[#A65D47] text-white font-medium hover:bg-[#8E4C38]">Send Custom Request</button>
+        </form>
+        <p id="custom-msg" class="hidden text-center text-xs text-emerald-700 font-medium mt-3">✨ Request received! We will message you soon on WhatsApp/Instagram.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Floating Scroll-to-Top Button -->
+  <button type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" aria-label="Scroll to top"
+    class="fixed bottom-5 right-5 z-30 w-11 h-11 rounded-full bg-[#3D2E27] hover:bg-[#A65D47] text-white shadow-md flex items-center justify-center transition">
+    ↑
+  </button>
 
   <!-- Customer Footer (NO Admin Link) -->
   <footer class="border-t border-[#E6DDD1] py-10 px-6 text-xs text-[#7A6F66]">
@@ -256,9 +382,9 @@
       <div>
         <p class="font-semibold uppercase tracking-wider text-[#2B2420] text-[11px] mb-2">Quick Links</p>
         <ul class="space-y-1.5">
-          <li><a href="#corners" class="hover:text-[#2B2420]">Collections</a></li>
-          <li><a href="#shop" class="hover:text-[#2B2420]">Shop Collection</a></li>
-          <li><a href="#custom" class="hover:text-[#2B2420]">Custom Orders</a></li>
+          <li><a href="#corners" onclick="closeProductDetail()" class="hover:text-[#2B2420]">Collections</a></li>
+          <li><a href="#shop" onclick="closeProductDetail()" class="hover:text-[#2B2420]">Shop Collection</a></li>
+          <li><a href="#custom" onclick="closeProductDetail()" class="hover:text-[#2B2420]">Custom Orders</a></li>
         </ul>
       </div>
       <div>
@@ -400,6 +526,19 @@
     const UPI_NAME = document.body.dataset.upiName || 'Ayesha';
     const UPI_ID = document.body.dataset.upiId || 'theloopatelier@upi';
     let basket = [];
+    let wishlistIds = JSON.parse(localStorage.getItem('tla_wishlist') || '[]');
+
+    // Product Detail State
+    let activeDetailProduct = null;
+    let activeGalleryImages = [];
+    let activeGalleryIndex = 0;
+    let detailQty = 1;
+
+    const SAMPLE_REVIEWS = [
+      { author: 'Ananya R.', rating: 5, text: 'The yarn quality and neatness of every single stitch is unreal! Looked even prettier in person.' },
+      { author: 'Meera K.', rating: 5, text: 'Ordered as a gift and the packaging felt so personal and thoughtful. Totally worth it.' },
+      { author: 'Riya S.', rating: 4, text: 'Super cute and sturdy handmade piece. Will definitely order more colors soon!' }
+    ];
 
     const utrInput = document.getElementById('ord-utr');
     const paidCheckbox = document.getElementById('ord-paid-confirm');
@@ -438,7 +577,7 @@
             name: btn.dataset.name,
             price: Number(btn.dataset.price),
             image: btn.dataset.image
-          });
+          }, 1);
         });
       });
 
@@ -453,11 +592,146 @@
         }
       }
 
+      const prodParam = params.get('product');
+      if (prodParam) {
+        const card = document.querySelector(`.product-card[data-id="${prodParam}"]`);
+        if (card) openProductDetailFromCard(card);
+      }
+
       renderBasket();
       syncPaymentGate();
     });
 
+    // --- PRODUCT DETAIL VIEW FUNCTIONS ---
+    function openProductDetailFromCard(card) {
+      let extraImages = [];
+      try {
+        extraImages = JSON.parse(card.dataset.gallery || '[]');
+      } catch (e) {
+        extraImages = [];
+      }
+      const primaryImg = card.dataset.image;
+      const allImgs = [primaryImg, ...extraImages.filter(u => u && u !== primaryImg)];
+
+      activeDetailProduct = {
+        id: Number(card.dataset.id),
+        name: card.dataset.name,
+        subtitle: card.dataset.subtitle || '100% Combed Cotton',
+        category: card.dataset.category,
+        price: Number(card.dataset.price),
+        image: primaryImg,
+        description: card.dataset.description
+      };
+      activeGalleryImages = allImgs.length ? allImgs : [primaryImg];
+      activeGalleryIndex = 0;
+      detailQty = 1;
+
+      document.getElementById('pd-category').innerText = activeDetailProduct.category;
+      document.getElementById('pd-name').innerText = activeDetailProduct.name;
+      document.getElementById('pd-price').innerText = `₹${Math.round(activeDetailProduct.price)}`;
+      document.getElementById('pd-subtitle').innerText = activeDetailProduct.subtitle;
+      document.getElementById('pd-description').innerText = activeDetailProduct.description || 'Handcrafted crochet piece made with premium quality yarn. Thoughtfully stitched to order.';
+      document.getElementById('pd-qty').innerText = '1';
+
+      renderGallery();
+      syncWishlistButton();
+      renderDetailReviews();
+
+      document.getElementById('storefront-main').classList.add('hidden');
+      document.getElementById('product-detail-view').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closeProductDetail() {
+      document.getElementById('product-detail-view').classList.add('hidden');
+      document.getElementById('storefront-main').classList.remove('hidden');
+    }
+
+    function renderGallery() {
+      const mainImg = document.getElementById('pd-main-image');
+      mainImg.src = activeGalleryImages[activeGalleryIndex];
+      mainImg.alt = activeDetailProduct ? activeDetailProduct.name : 'Product Image';
+
+      const dotsContainer = document.getElementById('pd-dots');
+      const thumbsContainer = document.getElementById('pd-thumbs');
+      const prevBtn = document.getElementById('pd-prev-btn');
+      const nextBtn = document.getElementById('pd-next-btn');
+
+      const hasMultiple = activeGalleryImages.length > 1;
+      prevBtn.classList.toggle('hidden', !hasMultiple);
+      nextBtn.classList.toggle('hidden', !hasMultiple);
+
+      dotsContainer.innerHTML = activeGalleryImages.map((_, idx) => `
+        <button type="button" onclick="setGalleryIndex(${idx})"
+          class="h-1.5 rounded-full transition-all ${idx === activeGalleryIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/50'}"></button>
+      `).join('');
+
+      thumbsContainer.innerHTML = activeGalleryImages.map((src, idx) => `
+        <button type="button" onclick="setGalleryIndex(${idx})"
+          class="aspect-square rounded-2xl overflow-hidden bg-[#EFE8DD] border-2 transition ${idx === activeGalleryIndex ? 'border-[#2B2420] shadow-sm' : 'border-[#E6DDD1] opacity-75 hover:opacity-100'}">
+          <img src="${src}" alt="Thumbnail ${idx + 1}" class="w-full h-full object-cover" />
+        </button>
+      `).join('');
+    }
+
+    function setGalleryIndex(idx) {
+      activeGalleryIndex = idx;
+      renderGallery();
+    }
+
+    function stepGallery(delta) {
+      if (activeGalleryImages.length <= 1) return;
+      activeGalleryIndex = (activeGalleryIndex + delta + activeGalleryImages.length) % activeGalleryImages.length;
+      renderGallery();
+    }
+
+    function changeDetailQty(delta) {
+      detailQty = Math.max(1, detailQty + delta);
+      document.getElementById('pd-qty').innerText = String(detailQty);
+    }
+
+    function addDetailProductToBasket() {
+      if (!activeDetailProduct) return;
+      addToBasket(activeDetailProduct, detailQty);
+    }
+
+    function toggleDetailWishlist() {
+      if (!activeDetailProduct) return;
+      const id = activeDetailProduct.id;
+      if (wishlistIds.includes(id)) {
+        wishlistIds = wishlistIds.filter(x => x !== id);
+      } else {
+        wishlistIds.push(id);
+      }
+      localStorage.setItem('tla_wishlist', JSON.stringify(wishlistIds));
+      syncWishlistButton();
+    }
+
+    function syncWishlistButton() {
+      if (!activeDetailProduct) return;
+      const saved = wishlistIds.includes(activeDetailProduct.id);
+      document.getElementById('pd-wishlist-icon').innerText = saved ? '♥' : '♡';
+      document.getElementById('pd-wishlist-icon').classList.toggle('text-[#A65D47]', saved);
+      document.getElementById('pd-wishlist-text').innerText = saved ? 'Saved in Wishlist' : 'Wishlist';
+    }
+
+    function renderDetailReviews() {
+      document.getElementById('pd-review-score').innerText = '4.9';
+      document.getElementById('pd-review-count').innerText = `${SAMPLE_REVIEWS.length} reviews`;
+      document.getElementById('pd-reviews-list').innerHTML = SAMPLE_REVIEWS.map(r => `
+        <div class="bg-[#FDFBF8] border border-[#E6DDD1] rounded-2xl p-4">
+          <div class="flex items-center justify-between">
+            <p class="text-xs font-semibold text-[#2B2420]">${r.author}</p>
+            <span class="text-amber-500 text-xs">${'★'.repeat(r.rating)}</span>
+          </div>
+          <p class="text-xs text-[#7A6F66] mt-1.5 leading-relaxed">${r.text}</p>
+        </div>
+      `).join('');
+    }
+
+    // --- CATEGORY & BASKET FUNCTIONS ---
     function selectCategoryByName(cat) {
+      closeProductDetail();
       const targetBtn = Array.from(document.querySelectorAll('.cat-btn')).find(b => b.dataset.cat === cat);
       if (targetBtn) {
         filterCategory(cat, targetBtn);
@@ -478,10 +752,10 @@
       });
     }
 
-    function addToBasket(item) {
+    function addToBasket(item, qty = 1) {
       const existing = basket.find(i => i.id === item.id);
-      if (existing) existing.qty += 1;
-      else basket.push({ ...item, qty: 1 });
+      if (existing) existing.qty += qty;
+      else basket.push({ ...item, qty });
       renderBasket();
       toggleBasket(true);
     }

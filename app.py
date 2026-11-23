@@ -34,6 +34,7 @@ class Product(db.Model):
     stock = db.Column(db.Integer, default=3)
     visible = db.Column(db.Boolean, default=True)
     image_url = db.Column(db.String(300), default="")
+    gallery_images_json = db.Column(db.Text, default="[]")
     description = db.Column(db.Text, default="")
 
 
@@ -123,6 +124,7 @@ with app.app_context():
                 stock=4,
                 visible=True,
                 image_url="/static/cro2.jpeg",
+                gallery_images_json="[]",
                 description="A tiny Strawberry & Daisy charm - soft & cute."
             ),
             Product(
@@ -133,6 +135,7 @@ with app.app_context():
                 stock=6,
                 visible=True,
                 image_url="/static/cro3.jpeg",
+                gallery_images_json="[]",
                 description="A soft Daisy Keychain with a yellow centre."
             ),
             Product(
@@ -143,6 +146,7 @@ with app.app_context():
                 stock=3,
                 visible=True,
                 image_url="/static/cro4.jpeg",
+                gallery_images_json="[]",
                 description="Red heart keychain."
             ),
             Product(
@@ -153,6 +157,7 @@ with app.app_context():
                 stock=5,
                 visible=True,
                 image_url="/static/cro5.jpeg",
+                gallery_images_json="[]",
                 description="A tiny blue baby octopus keycahin soft& cute."
             )
         ]
@@ -324,6 +329,9 @@ def save_product():
     uploaded_url = save_uploaded_file(request.files.get("image_file"))
     image_url = uploaded_url or request.form.get("image_url", "").strip()
 
+    extra_files = request.files.getlist("gallery_files")
+    extra_urls = [u for f in extra_files if (u := save_uploaded_file(f))]
+
     if prod_id:
         prod = Product.query.get_or_404(int(prod_id))
         prod.name = request.form.get("name")
@@ -335,6 +343,8 @@ def save_product():
         prod.description = request.form.get("description", "")
         if image_url:
             prod.image_url = image_url
+        if extra_urls:
+            prod.gallery_images_json = json.dumps(extra_urls)
     else:
         prod = Product(
             name=request.form.get("name"),
@@ -344,6 +354,7 @@ def save_product():
             stock=int(request.form.get("stock", 1)),
             visible=request.form.get("visible") == "true",
             image_url=image_url or "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?auto=format&fit=crop&w=800&q=80",
+            gallery_images_json=json.dumps(extra_urls),
             description=request.form.get("description", "")
         )
         db.session.add(prod)
