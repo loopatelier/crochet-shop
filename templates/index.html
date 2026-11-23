@@ -445,8 +445,7 @@
             >
               📲 Open UPI Payment App
             </a>
-            <p class="text-[11px] text-[#7A6F66] mt-1.5">Take a screenshot of the scanner • Open your UPI app on mobile and scan 
-                                                                     • Then enter UTR/Transaction ID below</p></p>
+            <p class="text-[11px] text-[#7A6F66] mt-1.5">Take a screenshot of the scanner • Open your UPI app on mobile and scan • Then enter UTR/Transaction ID below</p>
           </div>
 
           <div>
@@ -694,6 +693,8 @@
     function addDetailProductToBasket() {
       if (!activeDetailProduct) return;
       addToBasket(activeDetailProduct, detailQty);
+      detailQty = 1;
+      document.getElementById('pd-qty').innerText = '1';
     }
 
     function toggleDetailWishlist() {

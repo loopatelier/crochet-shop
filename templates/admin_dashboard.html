@@ -201,6 +201,7 @@
         <form action="/admin/settings" method="POST" enctype="multipart/form-data" class="space-y-4 text-sm">
           <div>
             <label class="block text-xs font-semibold uppercase text-[#7A6F66] mb-1">Your UPI ID (GPay / PhonePe / Paytm)</label>
+            <input type="text" name="upi_id" value="{{ settings.upi_id }}" placeholder="e.g. yourname@okaxis" class="w-full px-4 py-2.5 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1]" />
           </div>
           <div>
             <label class="block text-xs font-semibold uppercase text-[#7A6F66] mb-1">Payee Display Name</label>
@@ -284,8 +285,18 @@
           <input type="hidden" name="image_url" id="prod-image-url" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-[#7A6F66]">Additional Gallery Photos (Optional — Select Multiple)</label>
-          <input type="file" name="gallery_files" accept="image/*" multiple class="w-full text-xs mt-1" />
+          <label for="gallery_files" class="block text-xs font-semibold text-[#7A6F66]">Second / Extra Gallery Image (Optional — Select Multiple)</label>
+          <input
+            type="file"
+            id="gallery_files"
+            name="gallery_files"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            multiple
+            class="w-full px-3.5 py-2 rounded-xl bg-[#F6F1EA] border border-[#E6DDD1] text-xs text-[#2B2420] mt-1"
+          />
+          <p class="text-[11px] text-[#7A6F66] mt-1">
+            Pick a second photo (like a close-up or back view) so customers can swipe/click between photos on the product page.
+          </p>
         </div>
         <div>
           <label class="block text-xs font-semibold text-[#7A6F66]">Description</label>
@@ -323,6 +334,7 @@
       document.getElementById('prod-stock').value = '3';
       document.getElementById('prod-description').value = '';
       document.getElementById('prod-image-url').value = '';
+      document.getElementById('gallery_files').value = '';
       document.getElementById('productModal').classList.remove('hidden');
       document.getElementById('productModal').classList.add('flex');
     }
@@ -337,6 +349,7 @@
       document.getElementById('prod-visible').value = btn.dataset.visible;
       document.getElementById('prod-image-url').value = btn.dataset.image;
       document.getElementById('prod-description').value = btn.dataset.description;
+      document.getElementById('gallery_files').value = '';
       document.getElementById('productModal').classList.remove('hidden');
       document.getElementById('productModal').classList.add('flex');
     }

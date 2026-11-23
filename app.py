@@ -182,7 +182,7 @@ with app.app_context():
                 gallery_images_json="[]",
                 description="A letter and kitty keychain set with pearls."
             ),
-             Product(
+            Product(
                 name="Rose Bag",
                 subtitle="Acrylic Yarn",
                 category="Bouquets & Bags",
@@ -190,10 +190,10 @@ with app.app_context():
                 stock=5,
                 visible=True,
                 image_url="/static/rose1.jpeg",
-                gallery_images_json="[/static/rose2.jpeg]",
+                gallery_images_json='["/static/rose2.jpeg"]',
                 description="A deep red rose bag with a pearl strap."
             ),
-             Product(
+            Product(
                 name="Hanging Spiderman ",
                 subtitle="Acrylic Yarn",
                 category="Amigurumi & Key Charms",
@@ -204,7 +204,7 @@ with app.app_context():
                 gallery_images_json="[]",
                 description="A tiny spider hero plush."
             ),
-             Product(
+            Product(
                 name="Frog pet hat",
                 subtitle="Acrylic Yarn",
                 category="Book & Pet Accessories",
@@ -212,7 +212,7 @@ with app.app_context():
                 stock=5,
                 visible=True,
                 image_url="/static/cat0.1.jpeg",
-                gallery_images_json="[/static/cat0.jpeg]",
+                gallery_images_json='["/static/cat0.jpeg"]',
                 description="A green frog hat for pets."
             ),
             Product(
@@ -223,7 +223,7 @@ with app.app_context():
                 stock=5,
                 visible=True,
                 image_url="/static/cat1.0.jpeg",
-                gallery_images_json="[/static/cat1.jpeg]",
+                gallery_images_json='["/static/cat1.jpeg"]',
                 description="A red strawberry hat for pets."
             ),
             Product(
@@ -234,7 +234,7 @@ with app.app_context():
                 stock=5,
                 visible=True,
                 image_url="/static/cat2.0.jpeg",
-                gallery_images_json="[/static/cat2.jpeg]",
+                gallery_images_json='["/static/cat2.jpeg"]',
                 description="A pink flower hat for pets."
             ),
             Product(
@@ -245,10 +245,9 @@ with app.app_context():
                 stock=2,
                 visible=True,
                 image_url="/static/cover0.jpeg",
-                gallery_images_json="[/static/cover1.jpeg]",
+                gallery_images_json='["/static/cover1.jpeg"]',
                 description="A brown book cover with white daisies."
             )
-
         ]
         db.session.bulk_save_objects(sample_products)
         db.session.commit()
